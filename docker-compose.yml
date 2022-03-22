@@ -1,0 +1,26 @@
+version: '3'
+services:
+  
+  database:
+    image: mongo
+    restart: always
+    environment:
+      - MONGO_INITDB_ROOT_USERNAME=cristian
+      - MONGO_INITDB_ROOT_PASSWORD=cristian
+    volumes:
+      - my_data:/data/db
+  
+  node-web:
+    build: 
+      context: ./backend
+      dockerfile: Dockerfile
+    depends_on:
+      - database
+    volumes:
+      - ./app/node_modules
+      - ./backend:/app
+    ports:
+      - "5000:5000"
+
+volumes:
+  my_data:
