@@ -22,4 +22,4 @@ router.get("/sensor/latest/:name", async (req: Request, res: Response) => {
     return res.status(200).json(plant.sensor.sort((x: ISensor, y: ISensor) => x.timestamp!.getTime() - y.timestamp!.getTime()).reverse()[0])
 })
 
-export {router as sensorRoute }
+export {router as sensorRouter }
