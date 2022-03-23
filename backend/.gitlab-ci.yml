@@ -7,6 +7,7 @@ stages:
 build:
   stage: build
   script:
+    - cd backend/
     - npm install
   cache:
     paths:
@@ -23,6 +24,7 @@ test:
   dependencies:
    - build
   script:
+   - cd backend/
    - yarn test:ci
   cache:
    paths:
@@ -41,6 +43,7 @@ pages:
   dependencies:
     - test
   script:
+    -cd backend/
     - mkdir .public
     - cp -r coverage/* .public
     - mv .public backend/public
