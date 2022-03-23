@@ -1,13 +1,29 @@
 image: node:latest
 stages:
+  - build
   - test
+  - deploy
 
-test:
-  stage: test
-  dependencies:
-   - build
+build:
+  stage: build
   script:
     - cd backend/
     - npm install
-    - npm install --save --global jest @types/jest supertest
-    - npm test
+  cache:
+    paths:
+      - backend/node_modules/
+  artifacts:
+    expire_in: 1 days
+    when: on_success
+    paths:
+      - backend/node_modules/
+
+test:
+  stage: test
+  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
+  dependencies:
+   - build
+  script:
+   - cd backend/
+   - npm test
+   - npm install --save --global jest @types/jest supertest
