@@ -31,6 +31,8 @@ test:
     paths:
       - backend/coverage/
   artifacts:
+    paths:
+      - backend/coverage/
     when: always
     reports:
       junit:
