@@ -42,11 +42,12 @@ pages:
  dependencies:
    - test
  script:
+   - cd backend/
    - mkdir .public
    - cp -r coverage/* .public
    - mv .public public
  artifacts:
    paths:
-     - public
+     - backend/public
  only:
    - master
