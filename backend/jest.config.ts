@@ -7,9 +7,6 @@ export default {
   transform: {
     '^.+\\.ts?$': 'ts-jest',
   },
-  collectCoverageFrom: ["src/**/*.ts", "!**/node_modules/**"],
-  coverageReporters: ["html", "text", "text-summary", "cobertura"],
-  testMatch: ["**/*.test.ts"],
   // All imported modules in your tests should be mocked automatically
   // automock: false,
 
