@@ -1,6 +1,6 @@
-import { IPlant, Plant } from '../models/plant'
+import { IPlant, Plant } from '../src/models/plant'
 import { beforeAll, afterEach, afterAll } from '@jest/globals'
-import app from '../app'
+import app from '../src/app'
 import mongoose, { Mongoose } from 'mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import request from 'supertest'
