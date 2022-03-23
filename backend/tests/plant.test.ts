@@ -8,8 +8,10 @@ import request from 'supertest'
 let mongoServer: MongoMemoryServer
 let con: Mongoose
 
+jest.setTimeout(20 * 1000)
+
+
 beforeAll(async () => {
-    jest.setTimeout(20 * 1000)
     mongoServer = await MongoMemoryServer.create()
     con = await mongoose.connect(mongoServer.getUri(), { dbName: "Plants" })
 })
