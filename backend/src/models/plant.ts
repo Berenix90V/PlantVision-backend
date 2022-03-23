@@ -1,6 +1,9 @@
 import mongoose from 'mongoose'
 import { sensorSchema, ISensor } from './sensors'
 
+/**
+ * The document format of a plant in the mongodb database
+ */
 export interface IPlant {
     name: string,
     description?: string,
@@ -8,12 +11,17 @@ export interface IPlant {
     sensor?: [ISensor]
 }
 
+/**
+ * These types allow to have the sensor as a subdocument
+ */
 type PlantsDocumentsProps = {
     sensor: mongoose.Types.DocumentArray<ISensor>
 }
-
 type PlantsModelType = mongoose.Model<IPlant, {}, PlantsDocumentsProps>
 
+/**
+ * The schema of the plant document in the database
+ */
 const plantSchema = new mongoose.Schema<IPlant, PlantsModelType>({
     name: {
         type: String,

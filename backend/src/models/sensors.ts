@@ -1,6 +1,8 @@
 import mongoose from 'mongoose'
 
-export interface ISensor {
+/**
+ * The document format of a sensor in the mongodb database
+ */export interface ISensor {
     timestamp?: Date,
     airHumidity: number,
     soilMoisture: number,
@@ -8,6 +10,9 @@ export interface ISensor {
     lightIntensity: number,
 }
 
+/**
+ * The schema of the sensor subdocument in the database
+ */
 const sensorSchema = new mongoose.Schema<ISensor>({
     airHumidity: {
         type: Number,
