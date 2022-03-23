@@ -8,7 +8,7 @@ stages:
 build:
   stage: build
   script:
-    - npm install
+    - npm install --cwd "~/backend"
   cache:
     paths:
       - backend/node_modules/
