@@ -9,6 +9,8 @@ import { ISensor } from '../src/models/sensors'
 let mongoServer: MongoMemoryServer
 let con: Mongoose
 
+jest.setTimeout(20 * 1000)
+
 beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create()
     con = await mongoose.connect(mongoServer.getUri(), { dbName: "Plants" })

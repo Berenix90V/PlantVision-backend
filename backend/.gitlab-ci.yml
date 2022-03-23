@@ -1,0 +1,37 @@
+image: node:latest
+stages:
+  - build
+  - test
+
+build:
+  stage: build
+  script:
+    - cd backend/
+    - npm install
+  cache:
+    paths:
+      - backend/node_modules/
+  artifacts:
+    expire_in: 1 days
+    when: on_success
+    paths:
+      - backend/node_modules/
+
+test:
+  stage: test
+  coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
+  dependencies:
+   - build
+  script:
+   - cd backend/
+   - npm install --save --global jest @types/jest supertest mongodb-memory-server
+   - npm run test:ci
+  cache:
+    paths:
+      - backend/coverage/
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - backend/junit.xml
+      cobertura: backend/coverage/cobertura-coverage.xml
