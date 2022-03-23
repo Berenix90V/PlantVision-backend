@@ -25,5 +25,11 @@ test:
    - build
   script:
    - cd backend/
-   - npm test
    - npm install --save --global jest @types/jest supertest mongodb-memory-server
+   - npm test:ci
+  artifacts:
+    when: always
+    reports:
+      junit:
+        - junit.xml
+      cobertura: coverage/cobertura-coverage.xml
