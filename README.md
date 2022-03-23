@@ -59,6 +59,7 @@ docker-compose ps
 ```
 
 should give an output similar to this:
+
 ```sh
          Name                        Command               State           Ports
 -----------------------------------------------------------------------------------------
