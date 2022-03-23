@@ -25,7 +25,7 @@ Notable libraries used include:
 
 #### Routes
 
-The backend REST API exposes two routes: `/plants` and `/sensors`. For an extensive documentation of the routes check []()
+The backend REST API exposes two routes: `/plants` and `/sensors`.
 
 ## Installation
 
@@ -69,3 +69,14 @@ smart-plants_node-web_1   docker-entrypoint.sh npm start   Up      0.0.0.0:5000-
 If the outputs match, visit [http://localhost:5000/plants](http://localhost:5000/plants) and check that there is an empty JSON array as output.
 
 **You are set!**
+
+## TODO
+
+- [ ] Backend
+  - [X] Routes
+  - [X] Database
+  - [ ] Documentation
+  - [X] Deployment using Docker
+  - [ ] CI/CD
+- [ ] Frontend
+- [ ] Embedded
