@@ -78,5 +78,6 @@ If the outputs match, visit [http://localhost:5000/plants](http://localhost:5000
   - [ ] Documentation
   - [X] Deployment using Docker
   - [ ] CI/CD
+  - [X] Unit and Coverage testing for routes
 - [ ] Frontend
 - [ ] Embedded
