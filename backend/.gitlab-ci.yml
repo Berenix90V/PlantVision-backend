@@ -25,7 +25,7 @@ test:
   script:
    - cd backend/
    - npm install --save --global jest @types/jest supertest mongodb-memory-server
-   - npm test:ci
+   - npm run test:ci
   cache:
     paths:
       - backend/coverage/
