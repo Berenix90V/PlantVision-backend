@@ -27,9 +27,12 @@ test:
    - cd backend/
    - npm install --save --global jest @types/jest supertest mongodb-memory-server
    - npm test:ci
+  cache:
+    paths:
+      - backend/coverage/
   artifacts:
     when: always
     reports:
       junit:
-        - junit.xml
-      cobertura: coverage/cobertura-coverage.xml
+        - backend/junit.xml
+      cobertura: backend/coverage/cobertura-coverage.xml
