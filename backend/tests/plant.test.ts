@@ -9,6 +9,7 @@ let mongoServer: MongoMemoryServer
 let con: Mongoose
 
 beforeAll(async () => {
+    jest.setTimeout(20 * 1000)
     mongoServer = await MongoMemoryServer.create()
     con = await mongoose.connect(mongoServer.getUri(), { dbName: "Plants" })
 })
