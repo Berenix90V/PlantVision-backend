@@ -8,15 +8,15 @@ stages:
 build:
   stage: build
   script:
-    - yarn
+    - npm install
   cache:
     paths:
-      - node_modules/
+      - backend/node_modules/
   artifacts:
     expire_in: 1 days
     when: on_success
     paths:
-      - node_modules/
+      - backend/node_modules/
 
 test:
   stage: test
@@ -27,24 +27,24 @@ test:
    - yarn test:ci
   cache:
    paths:
-     - coverage/
+     - backend/coverage/
   artifacts:
     paths:
-     - coverage/
+     - backend/coverage/
     when: always
     reports:
       junit:
         - junit.xml
-      cobertura: coverage/cobertura-coverage.xml
+      cobertura: backend/coverage/cobertura-coverage.xml
 
 pages:
   stage: deploy
   dependencies:
     - test
   script:
-    - mkdir .public
-    - cp -r coverage/* .public
-    - mv .public public
+    - mkdir backend/.public
+    - cp -r backend/coverage/* .public
+    - mv backend/.public backend/public
   artifacts:
     paths:
       - public
