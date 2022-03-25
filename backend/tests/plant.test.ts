@@ -4,7 +4,7 @@ import app from '../src/app'
 import mongoose, { Mongoose } from 'mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import request from 'supertest'
-import { ErrorType, IError } from '../src/models/errror'
+import { MessageType, IMessage } from '../src/models/message'
 
 let mongoServer: MongoMemoryServer
 let con: Mongoose
@@ -84,8 +84,8 @@ describe("Insert a new plant", () => {
 
         expect(second.statusCode).toBe(409)
         
-        const errorMessage: IError = second.body
-        expect(errorMessage.error).toBe(ErrorType.CONFLICT)
+        const errorMessage: IMessage = second.body
+        expect(errorMessage.type).toBe(MessageType.CONFLICT)
 
      })
 
@@ -109,8 +109,8 @@ describe('Retrieve a plant', () => {
     test('should return an errror message when searching for a non exisiting plant', async () => { 
         const response = await request(app).get("/plants/Basilico")
         expect(response.statusCode).toBe(404)
-        const errorMessage: IError = response.body
-        expect(errorMessage.error).toBe(ErrorType.NOT_FOUND)
+        const errorMessage: IMessage = response.body
+        expect(errorMessage.type).toBe(MessageType.NOT_FOUND)
      })
 })
 
@@ -144,8 +144,8 @@ describe('Add a sensor reading to a plant', () => {
     test('should return an error message when adding to a non existing plant', async () => { 
         const response = await request(app).put("/plants/Basilico").send({sensor: {}})
         expect(response.statusCode).toBe(404)
-        const errorMessage: IError = response.body
-        expect(errorMessage.error).toBe(ErrorType.NOT_FOUND)
+        const errorMessage: IMessage = response.body
+        expect(errorMessage.type).toBe(MessageType.NOT_FOUND)
      })
      test('should add a sensor reading to an existing plant', async () => { 
         const oldPlant = new Plant({

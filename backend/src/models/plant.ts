@@ -22,7 +22,7 @@ type PlantsModelType = mongoose.Model<IPlant, {}, PlantsDocumentsProps>
 /**
  * The schema of the plant document in the database
  */
-const plantSchema = new mongoose.Schema<IPlant, PlantsModelType>({
+export const plantSchema = new mongoose.Schema<IPlant, PlantsModelType>({
     name: {
         type: String,
         required: true,

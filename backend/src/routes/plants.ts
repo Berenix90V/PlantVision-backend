@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
 import { Plant } from '../models/plant'
-import { ErrorType, IError } from '../models/errror'
+import { MessageType, IMessage } from '../models/message'
 
 
 const router = express.Router()
@@ -24,8 +24,8 @@ router.get("/plants/:name", async (req: Request, res: Response) => {
     const plant = await Plant.findOne({ name: name })
 
     if (!plant) {
-        let error: IError = {
-            error: ErrorType.NOT_FOUND,
+        let error: IMessage = {
+            type: MessageType.NOT_FOUND,
             message: `The plant ${name} is not in the database`
         }
         return res.status(404).json(error)
@@ -46,8 +46,8 @@ router.post("/plants", async (req: Request, res: Response) => {
     const plant = new Plant({ name, description, sensor })
 
     if(await Plant.exists({name: name})) {
-        let error: IError = {
-            error: ErrorType.CONFLICT,
+        let error: IMessage = {
+            type: MessageType.CONFLICT,
             message: `The plant ${name} already exists`
         }
         return res.status(409).json(error)
@@ -68,8 +68,8 @@ router.put("/plants/:name", async (req: Request, res: Response) => {
     const plant = await Plant.findOne({ name: name })
 
     if (!plant) {
-        let error: IError = {
-            error: ErrorType.NOT_FOUND,
+        let error: IMessage = {
+            type: MessageType.NOT_FOUND,
             message: `The plant ${name} is not in the database`
         }
         return res.status(404).json(error)
