@@ -6,10 +6,15 @@ stages:
 
 build:
   stage: build
+  except: 
+    - master
   script:
     - cd backend/
     - npm install
   cache:
+    key:
+      files:
+        - backend/package-lock.json
     paths:
       - backend/node_modules/
   artifacts:
@@ -20,6 +25,8 @@ build:
 
 test:
   stage: test
+  except: 
+    - master
   coverage: /All files[^|]*\|[^|]*\s+([\d\.]+)/
   dependencies:
    - build
@@ -28,6 +35,9 @@ test:
    - npm install --save --global jest @types/jest supertest mongodb-memory-server
    - npm run test:ci
   cache:
+    key:
+      files:
+        - backend/package-lock.json
     paths:
       - backend/coverage/
   artifacts:
@@ -41,12 +51,12 @@ test:
 
 pages:
  stage: deploy
- dependencies:
-   - test
+ image: node:17-alpine
  script:
    - cd backend/
+   - npm install redoc-cli
    - npm run start:docs
-   - mv backend/public public
+   - mv ./public ../public
  artifacts:
    paths:
      - public
