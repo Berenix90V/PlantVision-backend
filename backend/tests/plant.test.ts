@@ -4,6 +4,7 @@ import app from '../src/app'
 import mongoose, { Mongoose } from 'mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import request from 'supertest'
+import { ErrorType, IError } from '../src/models/errror'
 
 let mongoServer: MongoMemoryServer
 let con: Mongoose
@@ -34,6 +35,19 @@ afterAll(async () => {
 
 describe("Insert a new plant", () => {
 
+    const testPlant: IPlant = {
+        name: "Salvia",
+        description: "Salvia plant",
+        sensor: [
+            {
+                "airHumidity": 30.2,
+                "soilMoisture": 90,
+                "airTemperature": 26,
+                "lightIntensity": 100
+            }
+        ]
+    }
+
     test('Should save a new salvia plant without a sensor array', async () => {
 
         const response = await request(app).post("/plants").send({
@@ -51,18 +65,7 @@ describe("Insert a new plant", () => {
 
     test('Should save a new salvia plant with a sensor array containing 1 reading', async () => {
 
-        const response = await request(app).post("/plants").send({
-            name: "Salvia",
-            description: "Salvia plant",
-            sensor: [
-                {
-                    "airHumidity": 30.2,
-                    "soilMoisture": 90,
-                    "airTemperature": 26,
-                    "lightIntensity": 100
-                }
-            ]
-        })
+        const response = await request(app).post("/plants").send(testPlant)
 
         expect(response.statusCode).toBe(201)
         const plant: IPlant = response.body
@@ -71,6 +74,20 @@ describe("Insert a new plant", () => {
         expect(plant.description).toBe("Salvia plant")
         expect(plant.sensor?.length).toBe(1)
     })
+
+    test('should return an error when inserting a new plant with the same name of an existing one', async () => { 
+        const first = await request(app).post("/plants").send(testPlant)
+
+        expect(first.statusCode).toBe(201)
+
+        const second = await request(app).post("/plants").send(testPlant)
+
+        expect(second.statusCode).toBe(409)
+        
+        const errorMessage: IError = second.body
+        expect(errorMessage.error).toBe(ErrorType.CONFLICT)
+
+     })
 
 })
 
@@ -89,9 +106,11 @@ describe('Retrieve a plant', () => {
         expect(plant.name).toBe("Salvia")
     })
 
-    test('should return 404 when searching for a non exisiting plant', async () => { 
+    test('should return an errror message when searching for a non exisiting plant', async () => { 
         const response = await request(app).get("/plants/Basilico")
         expect(response.statusCode).toBe(404)
+        const errorMessage: IError = response.body
+        expect(errorMessage.error).toBe(ErrorType.NOT_FOUND)
      })
 })
 
@@ -122,9 +141,11 @@ describe('Retrieve all plants', () => {
 })
 
 describe('Add a sensor reading to a plant', () => { 
-    test('should return 404 when adding to a non existing plant', async () => { 
+    test('should return an error message when adding to a non existing plant', async () => { 
         const response = await request(app).put("/plants/Basilico").send({sensor: {}})
         expect(response.statusCode).toBe(404)
+        const errorMessage: IError = response.body
+        expect(errorMessage.error).toBe(ErrorType.NOT_FOUND)
      })
      test('should add a sensor reading to an existing plant', async () => { 
         const oldPlant = new Plant({

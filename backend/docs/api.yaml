@@ -1,0 +1,196 @@
+openapi: 3.0.0
+info:
+  title: Smart plants API documentation
+  description: Smart plants public API implementation and documentation
+  version: 1.0
+  license:
+    name: MIT
+    url: https://opensource.org/licenses/MIT
+
+servers:
+  - url: http://localhost:5000
+
+tags:
+  - name: Plants
+    description: All tasks regarding plants
+  - name: Sensors
+    description: All tasks regarding sensors
+
+
+paths:
+  /plants:
+    get:
+      summary: Returns all plants store in the databaseù
+      tags:
+        - Plants
+      responses:
+        '200':
+          description: The plants are successfully retrieved
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Plant'
+    post:
+      summary: Inserts a new plant
+      tags:
+        - Plants
+      requestBody:
+        description: The new plant that will be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Plant'
+      responses:
+        '201':
+          description: The plant was succesfully added
+          content:
+            application/json:
+              schema:
+                  $ref: '#/components/schemas/Plant'
+        '409':
+          description: The plant already exists
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+  /plants/{name}:
+    put:
+      summary: Adds a new sensor reading to a plant
+      tags:
+        - Plants
+      parameters:
+        - in: name
+          name: name
+          schema:
+            type: integer
+          required: true
+          description: The name of the plant  
+      requestBody:
+        description: The sensor reading that will be added
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Sensor'
+      responses:
+        '200':
+          description: The sensor was successfully added to the requested plant
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Plant'
+        '404':
+          description: The requested plant does not exist
+          schema:
+            $ref: '#/components/responses/NotFound'
+  /sensor/all/{name}:
+    get: 
+      summary: Gets all sensor reading for a plant
+      tags:
+        - Sensors
+      parameters:
+          - in: name
+            name: name
+            schema:
+              type: integer
+            required: true
+            description: The name of the plant
+      responses:
+          '200':
+            description: The sensors are successfully retrieved
+            content:
+              application/json:
+                schema:
+                  type: array
+                  items:
+                    $ref: '#/components/schemas/Sensor'
+          '404':
+            description: The requested plant does not exist
+            schema:
+              $ref: '#/components/schemas/Error'
+  /sensor/latest/{name}:
+    get: 
+      summary: Gets the latest sensor reading of a plant
+      tags:
+        - Sensors
+      parameters:
+          - in: name
+            name: name
+            schema:
+              type: integer
+            required: true
+            description: The name of the plant
+      responses:
+          '200':
+            description: The latest sensor data is successfully retrived
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/Sensor'
+          '404':
+            description: The requested plant does not exist
+            schema:
+              $ref: '#/components/schemas/Error'
+
+components:
+  schemas:
+    Sensor:
+      type: object
+      properties:
+        airTemeperature:
+          type: float
+          description: The temperature around the plant
+          example: 24.2
+        airHumidity:
+          type: float
+          description: The humidity of the air around the plant
+          example: 85
+        soilMoisture:
+          type: float
+          description: The humidity of the soil where the plant is placed
+          example: 44.45
+        lightIntensity:
+          type: float
+          description: The amount of light that shines into the plant
+          example: 90
+      required:
+        - airTemeperature
+        - airHumidity
+        - soilMoisture
+        - lightIntensity
+    Plant:
+      type: object
+      properties:
+        name:
+          type: string
+          description: The name of the plant
+          example: Basel
+        description:
+          type: string
+          description: A short description describing the plant
+          example: Basel plant in the kitchen
+        sensor:
+          type: array
+          description: An array of sensor readings
+          items:
+            $ref: '#/components/schemas/Sensor'
+      required:
+        - name
+    ErrorType:
+      type: string
+      enum: [NOT_FOUND, CONFLICT]
+      example: NOT_FOUND
+    Error:
+      type: object
+      properties:
+        type:
+          description: The error type
+          $ref: "#/components/schemas/ErrorType"
+        message:
+          description: The error message
+          type: string
+          example: The resource is not found
+  
