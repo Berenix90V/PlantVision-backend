@@ -76,9 +76,9 @@ If the outputs match, visit [http://localhost:5000/plants](http://localhost:5000
 - [ ] Backend
   - [X] Routes
   - [X] Database
-  - [ ] Documentation
+  - [X] Documentation
   - [X] Deployment using Docker
-  - [ ] CI/CD
+  - [X] CI/CD
   - [X] Unit and Coverage testing for routes
 - [ ] Frontend
 - [ ] Embedded
