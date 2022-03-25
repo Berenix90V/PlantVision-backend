@@ -44,9 +44,9 @@ pages:
  dependencies:
    - test
  script:
-   - mkdir .public
-   - cp -r backend/coverage/* .public
-   - mv .public public
+   - cd backend/
+   - npm run start:docs
+   - mv backend/public public
  artifacts:
    paths:
      - public
