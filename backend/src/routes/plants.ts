@@ -41,20 +41,21 @@ router.get("/plants/:name", async (req: Request, res: Response) => {
  */
 router.post("/plants", async (req: Request, res: Response) => {
     const { name, description, sensor } = req.body
+
+
     const plant = new Plant({ name, description, sensor })
 
-    const existingPlant = Plant.findOne({name: name})
-
-    if(existingPlant != null) {
+    if(await Plant.exists({name: name})) {
         let error: IError = {
             error: ErrorType.CONFLICT,
             message: `The plant ${name} already exists`
         }
         return res.status(409).json(error)
     }
-
-    await plant.save()
-    return res.status(201).json(plant)
+    else {
+        await plant.save()
+        return res.status(201).json(plant)
+    }
 })
 
 /**
