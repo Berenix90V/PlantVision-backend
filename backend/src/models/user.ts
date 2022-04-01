@@ -5,7 +5,7 @@ export interface IUser {
     username: string,
     password: string,
     createdAt?: Date,
-    plants?: [IPlant]
+    plants?: IPlant[]
 }
 
 type UserDocumentsProps = {

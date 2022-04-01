@@ -1,6 +1,6 @@
 import express, { Request, Response } from 'express'
-import { MessageType, IMessage, not_found, success, conflict } from '../models/message'
-import { IPlant, Plant } from '../models/plant'
+import { not_found, success, conflict } from '../models/message'
+import { Plant } from '../models/plant'
 import { User } from '../models/user'
 
 const router = express.Router()
@@ -33,8 +33,7 @@ router.post("/user", async (req: Request, res: Response) => {
             password: password,
             plants: plants
         })
-        await user.save()
-        return res.status(201).json(success("User created"))
+        return user.save().then(() => res.status(201).json(success("User created")))
     }
 })
 
@@ -54,9 +53,43 @@ router.put("/user/:username", async (req: Request, res: Response) => {
             description: description,
             sensor: sensor
         }))
-        user!.save()
-        return res.status(200).json(success("Plant added"))
+        return user!.save().then(() => res.status(200).json(success("Plant added")))
+        
     }
 })
+
+router.delete("/user/:username",async (req:Request, res: Response) => {
+    const username = req.params.username
+    
+    if(!await User.exists({username: username})) {
+        return res.status(404).json(not_found("User not found"))
+    }
+    else {
+        return User.deleteOne({username: username})
+        .then(() => res.sendStatus(204))
+    }
+    
+})
+
+router.patch("/user/:username", async (req: Request, res: Response) => {
+    const username = req.params.username
+    const {newName} = req.body
+
+    const user = await User.findOne({username: username})
+
+    if(!user) {
+        return res.status(404).json(not_found("User not found"))
+    }
+    else if(await User.findOne({username: newName})) {
+        return res.status(409).json(conflict(`User with usernam ${newName} already exists`))
+    }
+    else {
+        return user.updateOne({$set: {username: newName}}).then(
+            () => res.sendStatus(204)
+        )
+    }
+
+})
+
 
 export { router as userRouter }
