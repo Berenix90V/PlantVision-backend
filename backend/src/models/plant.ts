@@ -37,7 +37,9 @@ export const plantSchema = new mongoose.Schema<IPlant, PlantsModelType>({
     },
     sensor: {
         type: [sensorSchema],
-        default: []
+        default: [],
+        unique: false,
+        sparse: true
     }
 })
 

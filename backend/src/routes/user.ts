@@ -81,7 +81,7 @@ router.patch("/user/:username", async (req: Request, res: Response) => {
         return res.status(404).json(not_found("User not found"))
     }
     else if(await User.findOne({username: newName})) {
-        return res.status(409).json(conflict(`User with usernam ${newName} already exists`))
+        return res.status(409).json(conflict(`User with username ${newName} already exists`))
     }
     else {
         return user.updateOne({$set: {username: newName}}).then(

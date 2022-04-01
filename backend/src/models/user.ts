@@ -29,7 +29,9 @@ const userSchema = new mongoose.Schema<IUser, UsersModelType>({
     },
     plants: {
         type: [plantSchema],
-        default: []
+        default: [],
+        unique: false,
+        sparse: true
     }
 })
 
