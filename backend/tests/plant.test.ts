@@ -4,13 +4,14 @@ import app from '../src/app'
 import mongoose, { Mongoose } from 'mongoose'
 import { MongoMemoryServer } from 'mongodb-memory-server'
 import request from 'supertest'
-import { ErrorType, IError } from '../src/models/errror'
+import { MessageType, IMessage } from '../src/models/message'
+import { IUser, User } from '../src/models/user'
+import { ISensor } from '../src/models/sensors'
 
 let mongoServer: MongoMemoryServer
 let con: Mongoose
 
 jest.setTimeout(20 * 1000)
-
 
 beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create()
@@ -22,7 +23,8 @@ afterEach(async () => {
 
     for (const key in collections) {
         const collection = collections[key];
-        await collection.deleteMany({});
+        await collection.deleteMany({})
+        await collection.dropIndexes()
     }
 })
 
@@ -33,150 +35,128 @@ afterAll(async () => {
         await mongoServer.stop()
 })
 
-describe("Insert a new plant", () => {
+const user: IUser = {
+    username: "Silvio",
+    password: "test",
+    plants: []
+}
+const plant: IPlant = {
+    name: "Salvia",
+    description: "Salvia plant"
+}
+const sensor: ISensor = {
+    airTemperature: 23.3,
+    airHumidity: 87,
+    lightIntensity: 100,
+    soilMoisture: 42
+}
 
-    const testPlant: IPlant = {
-        name: "Salvia",
-        description: "Salvia plant",
-        sensor: [
-            {
-                "airHumidity": 30.2,
-                "soilMoisture": 90,
-                "airTemperature": 26,
-                "lightIntensity": 100
-            }
-        ]
-    }
-
-    test('Should save a new salvia plant without a sensor array', async () => {
-
-        const response = await request(app).post("/plants").send({
-            name: "Salvia",
-            description: "Salvia plant"
-        })
-
-        expect(response.statusCode).toBe(201)
-        const plant: IPlant = response.body
-        expect(plant).toBeTruthy()
-        expect(plant.name).toBe("Salvia")
-        expect(plant.description).toBe("Salvia plant")
-        expect(plant.sensor).toStrictEqual([])
-    })
-
-    test('Should save a new salvia plant with a sensor array containing 1 reading', async () => {
-
-        const response = await request(app).post("/plants").send(testPlant)
-
-        expect(response.statusCode).toBe(201)
-        const plant: IPlant = response.body
-        expect(plant).toBeTruthy()
-        expect(plant.name).toBe("Salvia")
-        expect(plant.description).toBe("Salvia plant")
-        expect(plant.sensor?.length).toBe(1)
-    })
-
-    test('should return an error when inserting a new plant with the same name of an existing one', async () => { 
-        const first = await request(app).post("/plants").send(testPlant)
-
-        expect(first.statusCode).toBe(201)
-
-        const second = await request(app).post("/plants").send(testPlant)
-
-        expect(second.statusCode).toBe(409)
-        
-        const errorMessage: IError = second.body
-        expect(errorMessage.error).toBe(ErrorType.CONFLICT)
-
-     })
-
-})
-
-describe('Retrieve a plant', () => {
-    const newPlant = new Plant({
-        name: "Salvia",
-        description: "Salvia plant"
-    })
-
-    test('should return an existing Salvia plant', async () => {
-        await newPlant.save()
-        const response = await request(app).get("/plants/Salvia").expect(200)
-        const plant: IPlant = response.body
-
-        expect(plant).toBeTruthy()
-        expect(plant.name).toBe("Salvia")
-    })
-
-    test('should return an errror message when searching for a non exisiting plant', async () => { 
-        const response = await request(app).get("/plants/Basilico")
-        expect(response.statusCode).toBe(404)
-        const errorMessage: IError = response.body
-        expect(errorMessage.error).toBe(ErrorType.NOT_FOUND)
-     })
-})
-
-describe('Retrieve all plants', () => {
-    test('should return an empty list of plants', async () => {
-        const response = await request(app).get("/plants").expect(200)
-        const plants: [IPlant] = response.body
-        expect(plants).toStrictEqual([])
-    })
-    test('should return a list of 3 plants', async () => {
-        Plant.insertMany([
-            {
-                name: "Salvia"
-            },
-            {
-                name: "Basilico",
-                description: "Basilico plant"
-            },
-            {
-                name: "Rosmarino",
-                sensor: []
-            }
-        ])
-        const response = await request(app).get("/plants").expect(200)
-        const plants: [IPlant] = response.body
-        expect(plants).toHaveLength(3)
-    })
-})
-
-describe('Add a sensor reading to a plant', () => { 
-    test('should return an error message when adding to a non existing plant', async () => { 
-        const response = await request(app).put("/plants/Basilico").send({sensor: {}})
-        expect(response.statusCode).toBe(404)
-        const errorMessage: IError = response.body
-        expect(errorMessage.error).toBe(ErrorType.NOT_FOUND)
-     })
-     test('should add a sensor reading to an existing plant', async () => { 
-        const oldPlant = new Plant({
-            name: "Salvia",
-            description: "Salvia plant",
-            sensor: [
-                {
-                    "airHumidity": 30.2,
-                    "soilMoisture": 90,
-                    "airTemperature": 26,
-                    "lightIntensity": 100
-                }
-            ]
-        })
-
-        Plant.create(oldPlant)
-
-
-        const response = await request(app).put("/plants/Salvia").send({
-            sensor: {
-                "airHumidity": 30.2,
-                "soilMoisture": 90,
-                "airTemperature": 26,
-                "lightIntensity": 100
-            }
-        })
+describe('Plants', () => {
+    it("should be found if user exists", async () => {
+        await User.create(user)
+        await request(app).put("/user/Silvio").send(plant)
+        const response = await request(app).get("/plant/Silvio")
         expect(response.statusCode).toBe(200)
+        const responseMessage: [IPlant] = response.body
+        expect(responseMessage).toHaveLength(1)
+    })
+    it("should not be found if user doens't exist", async() => {
+        const response = await request(app).get("/plant/Silvio")
+        expect(response.statusCode).toBe(404)
+        const responseMessage: IMessage = response.body
+        expect(responseMessage.type).toBe(MessageType.NOT_FOUND)
+    })
+    it("should be deleted if user is found", async () => {
+        await User.create(user)
+        await request(app).put("/user/Silvio").send(plant)
+        let response = await request(app).delete("/plant/Silvio")
+        expect(response.statusCode).toBe(200)
+        const responseMessage: IMessage = response.body
+        expect(responseMessage.type).toBe(MessageType.OK)
+        response = await request(app).get("/plant/Silvio")
+        expect(response.statusCode).toBe(200)
+        const plants: [IPlant] = response.body
+        expect(plants).toHaveLength(0)
+    })
+    it("should not be deleted if user doesn't exist", async () => {
+        await request(app).put("/user/Silvio").send(plant)
+        let response = await request(app).delete("/plant/Silvio")
+        expect(response.statusCode).toBe(404)
+        const responseMessage: IMessage = response.body
+        expect(responseMessage.type).toBe(MessageType.NOT_FOUND)
+    })
+})
 
-        const newPlant: IPlant = response.body
-        expect(newPlant).toBeTruthy()
-        expect(newPlant).toBeDefined()
-        expect(newPlant.sensor?.length).toBeGreaterThan(oldPlant.sensor.length)
-      })
- })
+describe('Plant', () => { 
+    it("should be added if doesn't exist",async () => {
+        await User.create(user)
+        const response = await request(app).post("/plant/Silvio").send(plant)
+        expect(response.statusCode).toBe(201)
+        const responseMessage: IMessage = response.body
+        expect(responseMessage.type).toBe(MessageType.OK)
+    })
+    it("should not be added if user doesn't exist", async () => {
+        const response = await request(app).post("/plant/Silvio").send(plant)
+        expect(response.statusCode).toBe(404)
+        const responseMessage: IMessage = response.body
+        expect(responseMessage.type).toBe(MessageType.NOT_FOUND)
+    })
+    it("should not be added if a plant with the same name exists", async () => {
+        await User.create(user)
+        let response = await request(app).post("/plant/Silvio").send(plant)
+        expect(response.statusCode).toBe(201)
+        let responseMessage: IMessage = response.body
+        expect(responseMessage.type).toBe(MessageType.OK)
+        response = await request(app).post("/plant/Silvio").send(plant)
+        expect(response.statusCode).toBe(409)
+        responseMessage = response.body
+        expect(responseMessage.type).toBe(MessageType.CONFLICT)
+    })
+    it("should be found when user and plant exist", async () => {
+        await User.create(user)
+        await request(app).put("/user/Silvio").send(plant)
+        const response = await request(app).get("/plant/Silvio/Salvia")
+        expect(response.statusCode).toBe(200)
+        const responseMessage: IPlant = response.body
+        expect(responseMessage).toBeTruthy();
+        expect(responseMessage.name).toBe(plant.name)
+    })
+    it("should not be found when user doesn't exist", async () => {
+        const response = await request(app).get("/plant/Silvio/Salvia")
+        expect(response.statusCode).toBe(404)
+        const responseMessage: IMessage = response.body
+        expect(responseMessage.type).toBe(MessageType.NOT_FOUND)
+        expect(responseMessage.message).toBe("User not found")
+    })
+    it("should not be found when plant doesn't exist", async () => {
+        await User.create(user)
+        const response = await request(app).get("/plant/Silvio/Salvia")
+        expect(response.statusCode).toBe(404)
+        const responseMessage: IMessage = response.body
+        expect(responseMessage.type).toBe(MessageType.NOT_FOUND)
+        expect(responseMessage.message).toBe("Plant not found")
+    })
+    it("should not be added when user doesn't exist", async () => {
+        const response = await request(app).put("/plant/Silvio/Salvia").send(sensor)
+        expect(response.statusCode).toBe(404)
+        const responseMessage: IMessage = response.body
+        expect(responseMessage.type).toBe(MessageType.NOT_FOUND)
+        expect(responseMessage.message).toBe("User not found")
+    })
+    it("should not be added when plant doesn't exist", async () => {
+        await User.create(user)
+        const response = await request(app).put("/plant/Silvio/Salvia").send(sensor)
+        expect(response.statusCode).toBe(404)
+        const responseMessage: IMessage = response.body
+        expect(responseMessage.type).toBe(MessageType.NOT_FOUND)
+        expect(responseMessage.message).toBe("Plant not found")
+    })
+    it("should be added when user and plant exist", async () => {
+        await User.create(user)
+        await request(app).put("/user/Silvio").send(plant)
+        const response = await request(app).put("/plant/Silvio/Salvia").send(sensor)
+        expect(response.statusCode).toBe(200)
+        const responseMessage: IMessage = response.body
+        expect(responseMessage.type).toBe(MessageType.OK)
+    })
+})

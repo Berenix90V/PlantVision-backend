@@ -11,6 +11,8 @@ servers:
   - url: http://localhost:5000
 
 tags:
+  - name: User
+    description: All tasks regarding a user
   - name: Plants
     description: All tasks regarding plants
   - name: Sensors
@@ -18,125 +20,420 @@ tags:
 
 
 paths:
-  /plants:
+  /user/{username}:
     get:
-      summary: Returns all plants store in the databaseù
       tags:
-        - Plants
+      - User
+      summary: Return user data
+      description: This route will return a JSON object identifying the user that requested it, except for the password field. If the user doesn't exist, it will return a NOT_FOUND error message
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          description: The username of the user
       responses:
         '200':
-          description: The plants are successfully retrieved
+          description: A JSON object will the user data
           content:
             application/json:
               schema:
-                type: array
-                items:
-                  $ref: '#/components/schemas/Plant'
-    post:
-      summary: Inserts a new plant
+                $ref: "#/components/schemas/UserNoPassword"
+        '404':
+          description: A NOT_FOUND error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NOT_FOUND"
+              example:
+                {
+                  "type": "NOT_FOUND",
+                  "message": "User not found"
+                }
+    put:
       tags:
-        - Plants
+      - User
+      - Plants
+      summary: Add a new plant to a user
+      description: This route will return an OK message if it was added successfully, a NOT_FOUND error message if the user doesn't exist, or a CONFLICT error message if the plant is already registered with that user
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          description: The username of the user
       requestBody:
-        description: The new plant that will be added
+        description: The data needed to construct a new plant object
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Plant'
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: the name of the plant
+                  example: Basel
+                description:
+                  type: string
+                  description: A short description of the plant
+                  example: Basel plant in the kitchen
+                sensor:
+                  type: array
+                  description: An array of sensor readings
+                  items:
+                    $ref: "#/components/schemas/Sensor"
+              required:
+                - name
+      responses:
+        200:
+          description: An OK message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OK"
+              example:
+                {
+                  "type": "OK",
+                  "message": "Plant added"
+                }
+          
+        404:
+          description: A NOT_FOUND error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NOT_FOUND"
+              example:
+                {
+                  "type": "NOT_FOUND",
+                  "message": "User not found"
+                }
+        409:
+          description: A CONFLICT error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CONFLICT"
+              example:
+                {
+                  "type": "CONFLICT",
+                  "message": "Plant  already exists"
+                }
+    delete:
+      tags:
+      - User
+      summary: Deletes a user
+      description: This route will return an OK message if the user has been corretly deleted. If the user doesn't exist, it will return a NOT_FOUND error message
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          description: The username of the user
+      responses:
+        '200':
+          description: An OK message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OK"
+              example:
+                {
+                  "type": "OK",
+                  "message": "User deleted"
+                }
+        '404':
+          description: A NOT_FOUND error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NOT_FOUND"
+              example:
+                {
+                  "type": "NOT_FOUND",
+                  "message": "User not found"
+                }
+  /user:
+    post:
+      tags:
+        - User
+      summary: Create a new user
+      description: This route will return an OK message if it was added successfully  or a CONFLICT error message if the user already exists
+      requestBody:
+        description: The data needed to construct a new user object
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                username:
+                  type: string
+                  description: The username of the user
+                  example: cristian
+                password:
+                  type: string
+                  description: The password of the user. It will be hashed before adding it to the database
+                  example: cristian
+                plants:
+                  type: array
+                  description: An array of plants
+                  items:
+                    $ref: "#/components/schemas/Plant"
+              required:
+                - username
+                - password
       responses:
         '201':
-          description: The plant was succesfully added
+          description: An OK message
           content:
             application/json:
               schema:
-                  $ref: '#/components/schemas/Plant'
+                $ref: "#/components/schemas/OK"
+              example:
+                {
+                  "type": "OK",
+                  "message": "User created"
+                }
         '409':
-          description: The plant already exists
+          description: A CONFLICT error message
           content:
             application/json:
               schema:
-                $ref: "#/components/schemas/Error"
-  /plants/{name}:
-    put:
-      summary: Adds a new sensor reading to a plant
+                $ref: "#/components/schemas/CONFLICT"
+              example:
+                {
+                  "type": "CONFLICT",
+                  "message": "User already exists"
+                }
+  /plant/{username}:
+    get:
+      tags:
+      - Plants
+      summary: Return user data
+      description: This route will return a JSON object identifying the plants associated with a user. If the user doesn't exist, it will return a NOT_FOUND error message
+      parameters:
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          description: The username of the user
+      responses:
+        '200':
+          description: A JSON object will the user data
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Plant"
+        '404':
+          description: A NOT_FOUND error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NOT_FOUND"
+              example:
+                {
+                  "type": "NOT_FOUND",
+                  "message": "User not found"
+                }
+    post:
       tags:
         - Plants
-      parameters:
-        - in: name
-          name: name
-          schema:
-            type: integer
-          required: true
-          description: The name of the plant  
+      summary: Create a new plant
+      description: This route will return an OK message if it was added successfully  or a CONFLICT error message if the plant already exists
       requestBody:
-        description: The sensor reading that will be added
+        description: The data needed to construct a new user object
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Sensor'
+              type: object
+              properties:
+                name:
+                  type: string
+                  description: The name of the plant
+                  example: Basel
+                description:
+                  type: string
+                  description: A short description of the plant
+                  example: Basel plant
+                sensor:
+                  type: array
+                  description: An array of sensor readings
+                  items:
+                    $ref: "#/components/schemas/Sensor"
+              required:
+                - username
+                - password
       responses:
-        '200':
-          description: The sensor was successfully added to the requested plant
+        '201':
+          description: An OK message
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/Plant'
-        '404':
-          description: The requested plant does not exist
+                $ref: "#/components/schemas/OK"
+              example:
+                {
+                  "type": "OK",
+                  "message": "Plant created"
+                }
+        '409':
+          description: A CONFLICT error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CONFLICT"
+              example:
+                {
+                  "type": "CONFLICT",
+                  "message": "Plant already exists"
+                }
+    delete:
+      tags:
+      - Plants
+      summary: Deletes all user plants
+      description: This route will return an OK message if the plants have been corretly deleted. If the user doesn't exist, it will return a NOT_FOUND error message
+      parameters:
+        - in: path
+          name: username
           schema:
-            $ref: '#/components/responses/NotFound'
-  /sensor/all/{name}:
-    get: 
-      summary: Gets all sensor reading for a plant
-      tags:
-        - Sensors
-      parameters:
-          - in: name
-            name: name
-            schema:
-              type: integer
-            required: true
-            description: The name of the plant
+            type: string
+          required: true
+          description: The username of the user
       responses:
-          '200':
-            description: The sensors are successfully retrieved
-            content:
-              application/json:
-                schema:
-                  type: array
-                  items:
-                    $ref: '#/components/schemas/Sensor'
-          '404':
-            description: The requested plant does not exist
-            schema:
-              $ref: '#/components/schemas/Error'
-  /sensor/latest/{name}:
-    get: 
-      summary: Gets the latest sensor reading of a plant
+        '200':
+          description: An OK message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OK"
+              example:
+                {
+                  "type": "OK",
+                  "message": "Plants deleted"
+                }
+        '404':
+          description: A NOT_FOUND error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NOT_FOUND"
+              example:
+                {
+                  "type": "NOT_FOUND",
+                  "message": "User not found"
+                }
+  /plant/{username}/{plantName}:
+     put:
       tags:
-        - Sensors
+      - Plants
+      - Sensors
+      summary: Add a new sensor reading to a plant
+      description: This route will return an OK message if it was added successfully or a NOT_FOUND error message if the user or the plant don't exist
       parameters:
-          - in: name
-            name: name
+        - in: path
+          name: username
+          schema:
+            type: string
+          required: true
+          description: The username of the user
+        - in: path
+          name: plantName
+          schema:
+            type: string
+          required: true
+          description: The name of the plant
+      requestBody:
+        description: The data needed to construct a new plant object
+        required: true
+        content:
+          application/json:
             schema:
-              type: integer
-            required: true
-            description: The name of the plant
+              type: object
+              properties:
+                airHumidity:
+                  type: float
+                  example: 100
+                soilMoisture:
+                  type: float
+                  example: 34.2
+                airTemperature:
+                  type: float
+                  example: 22.3
+                lightIntensity:
+                  type: float
+                  example: 75
+              required:
+                - airHumidity
+                - airTemperature
+                - soilMoisture
+                - lightIntensity
       responses:
-          '200':
-            description: The latest sensor data is successfully retrived
-            content:
-              application/json:
-                schema:
-                  $ref: '#/components/schemas/Sensor'
-          '404':
-            description: The requested plant does not exist
-            schema:
-              $ref: '#/components/schemas/Error'
+        200:
+          description: An OK message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OK"
+              example:
+                {
+                  "type": "OK",
+                  "message": "Sensor reading added"
+                }
+          
+        404:
+          description: A NOT_FOUND error message
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/NOT_FOUND"
+              example:
+                {
+                  "type": "NOT_FOUND",
+                  "message": "User not found"
+                }
 
 components:
   schemas:
+    UserNoPassword:
+      type: object
+      properties:
+        username:
+          type: string
+          description: The username of the user
+          example: cristian
+        plants:
+          type: array
+          description: The owned plants
+          items:
+            $ref: '#/components/schemas/Plant'
+      required:
+        - username
+        - password
+    User:
+      type: object
+      properties:
+        username:
+          type: string
+          description: The username of the user
+          example: cristian
+        password:
+          type: string
+          description: The password of the user. It will be hashed
+          example: cristian
+        plants:
+          type: array
+          description: The owned plants
+          items:
+            $ref: '#/components/schemas/Plant'
+      required:
+        - username
+        - password
     Sensor:
       type: object
       properties:
@@ -179,18 +476,41 @@ components:
             $ref: '#/components/schemas/Sensor'
       required:
         - name
-    ErrorType:
+    MessageType:
       type: string
-      enum: [NOT_FOUND, CONFLICT]
+      enum: [OK, NOT_FOUND, CONFLICT]
       example: NOT_FOUND
-    Error:
+    NOT_FOUND:
       type: object
       properties:
         type:
-          description: The error type
-          $ref: "#/components/schemas/ErrorType"
+          description: The message type
+          $ref: "#/components/schemas/MessageType"
+          example: NOT_FOUND
         message:
           description: The error message
           type: string
           example: The resource is not found
+    OK:
+      type: object
+      properties:
+        type:
+          description: The message type
+          $ref: "#/components/schemas/MessageType"
+          example: OK
+        message:
+          description: The message
+          type: string
+          example: Resource added
+    CONFLICT:
+      type: object
+      properties:
+        type:
+          description: The message type
+          $ref: "#/components/schemas/MessageType"
+          example: CONFLICT
+        message:
+          description: The message
+          type: string
+          example: The resource already exists
   
