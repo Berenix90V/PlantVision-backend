@@ -115,38 +115,4 @@ describe('User', () => {
         const messageBody: IMessage = response.body
         expect(messageBody.type).toBe(MessageType.NOT_FOUND)
     })
-    it("should change username", async () => {
-        await User.create(user)
-        const response = await request(app).patch("/user/Silvio").send({
-            newName: "Giorgio"
-        })
-        expect(response.statusCode).toBe(204)
-        const getUserResponse = await request(app).get("/user/Giorgio")
-        expect(getUserResponse.statusCode).toBe(200)
-        const newUser: IUser = getUserResponse.body
-        expect(newUser.username).toBe("Giorgio")
-        expect(newUser.plants).toEqual(user.plants)
-    })
-    it("should not change name when another user has it", async() => {
-        await User.create(user, {
-            username: "Mario",
-            password: "ciao",
-            
-        }).then(async () => {
-            const response = await request(app).patch("/user/Silvio").send({
-                newName: "Mario"
-            })
-            expect(response.statusCode).toBe(409)
-            const message: IMessage = response.body
-            expect(message.type).toBe(MessageType.CONFLICT)
-        })
-    })
-    it("should not change name when doesn't exist", async() => {
-        const response = await request(app).patch("/user/Silvio").send({
-            newName: "Giorgio"
-        })
-        expect(response.statusCode).toBe(404)
-        const message: IMessage = response.body
-        expect(message.type).toBe(MessageType.NOT_FOUND)
-    })
  })

@@ -36,4 +36,6 @@ const sensorSchema = new mongoose.Schema<ISensor>({
     }
 })
 
-export { sensorSchema }
+const Sensor = mongoose.model("Sensor", sensorSchema)
+
+export { Sensor, sensorSchema }

@@ -1,4 +1,5 @@
 import mongoose from 'mongoose'
+import { attributeSchema, IAttribute } from './attribute'
 import { sensorSchema, ISensor } from './sensors'
 
 /**
@@ -8,14 +9,16 @@ export interface IPlant {
     name: string,
     description?: string,
     createdAt?: Date,
-    sensor?: [ISensor]
+    sensor?: [ISensor],
+    attributes?: [IAttribute]
 }
 
 /**
  * These types allow to have the sensor as a subdocument
  */
 type PlantsDocumentsProps = {
-    sensor: mongoose.Types.DocumentArray<ISensor>
+    sensor: mongoose.Types.DocumentArray<ISensor>,
+    attributes: mongoose.Types.DocumentArray<IAttribute>
 }
 type PlantsModelType = mongoose.Model<IPlant, {}, PlantsDocumentsProps>
 
@@ -37,6 +40,12 @@ export const plantSchema = new mongoose.Schema<IPlant, PlantsModelType>({
     },
     sensor: {
         type: [sensorSchema],
+        default: [],
+        unique: false,
+        sparse: true
+    },
+    attributes:{
+        type: [attributeSchema],
         default: [],
         unique: false,
         sparse: true

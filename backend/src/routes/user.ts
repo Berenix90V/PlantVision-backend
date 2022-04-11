@@ -71,25 +71,4 @@ router.delete("/user/:username",async (req:Request, res: Response) => {
     
 })
 
-router.patch("/user/:username", async (req: Request, res: Response) => {
-    const username = req.params.username
-    const {newName} = req.body
-
-    const user = await User.findOne({username: username})
-
-    if(!user) {
-        return res.status(404).json(not_found("User not found"))
-    }
-    else if(await User.findOne({username: newName})) {
-        return res.status(409).json(conflict(`User with username ${newName} already exists`))
-    }
-    else {
-        return user.updateOne({$set: {username: newName}}).then(
-            () => res.sendStatus(204)
-        )
-    }
-
-})
-
-
 export { router as userRouter }
