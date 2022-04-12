@@ -3,7 +3,6 @@ import mongoose from 'mongoose'
 /**
  * The document format of a sensor in the mongodb database
  */export interface ISensor {
-    timestamp?: Date,
     airHumidity: number,
     soilMoisture: number,
     airTemperature: number,
@@ -30,9 +29,11 @@ const sensorSchema = new mongoose.Schema<ISensor>({
         type: Number,
         required: true
     },
-    timestamp: {
-        type: Date,
-        default: Date.now()
+},{
+    timestamps: true,
+    timeseries: {
+        timeField: "createdAt",
+        granularity: "seconds"
     }
 })
 

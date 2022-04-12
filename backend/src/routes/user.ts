@@ -37,7 +37,7 @@ router.post("/user", async (req: Request, res: Response) => {
     }
 })
 
-router.put("/user/:username", async (req: Request, res: Response) => {
+router.post("/user/:username", async (req: Request, res: Response) => {
     const username = req.params.username
     const {name, description, sensor} = req.body
 

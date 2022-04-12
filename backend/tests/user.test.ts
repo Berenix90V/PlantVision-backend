@@ -1,49 +1,10 @@
-import { IPlant } from '../src/models/plant'
-import { beforeAll, afterEach, afterAll } from '@jest/globals'
 import app from '../src/app'
-import mongoose, { Mongoose } from 'mongoose'
-import { MongoMemoryServer } from 'mongodb-memory-server'
 import request from 'supertest'
 import { MessageType, IMessage } from '../src/models/message'
 import { IUser, User } from '../src/models/user'
+import {plant, user} from "./base";
 
-let mongoServer: MongoMemoryServer
-let con: Mongoose
-
-jest.setTimeout(20 * 1000)
-
-beforeAll(async () => {
-    mongoServer = await MongoMemoryServer.create()
-    con = await mongoose.connect(mongoServer.getUri(), { dbName: "Plants" })
-})
-
-afterEach(async () => {
-    const collections = mongoose.connection.collections;
-
-    for (const key in collections) {
-        const collection = collections[key];
-        await collection.deleteMany({})
-        await collection.dropIndexes()
-    }
-})
-
-afterAll(async () => {
-    if (con)
-        await con.disconnect()
-    if (mongoServer)
-        await mongoServer.stop()
-})
-
-describe('User', () => { 
-    const user: IUser = {
-        username: "Silvio",
-        password: "test",
-        plants: []
-    }
-    const plant: IPlant = {
-        name: "Salvia",
-        description: "Salvia plant"
-    }
+describe('User', () => {
     it("should be created if doesn't exist", async () => {
         const response = await request(app).post("/user").send(user)
         expect(response.statusCode).toBe(201)
@@ -78,7 +39,7 @@ describe('User', () => {
     })
     it("should add a new plant", async () => {
         await User.create(user)
-        const response = await request(app).put("/user/Silvio").send(plant)
+        const response = await request(app).post("/user/Silvio").send(plant)
         expect(response.statusCode).toBe(200)
         const newResponse = await request(app).get("/user/Silvio")
         expect(newResponse.statusCode).toBe(200)
@@ -87,16 +48,16 @@ describe('User', () => {
         expect(modUser.plants).toHaveLength(1)
     })
     it("should not be found when adding a plant to a non existing user", async () => {
-        const response = await request(app).put("/user/Silvio").send(plant)
+        const response = await request(app).post("/user/Silvio").send(plant)
         expect(response.statusCode).toBe(404)
         const message: IMessage = response.body
         expect(message.type).toBe(MessageType.NOT_FOUND) 
     })
     it("should conflict when adding an existing plant", async () => {
         await User.create(user)
-        const response = await request(app).put("/user/Silvio").send(plant)
+        const response = await request(app).post("/user/Silvio").send(plant)
         expect(response.statusCode).toBe(200)
-        const newResponse = await request(app).put("/user/Silvio").send(plant)
+        const newResponse = await request(app).post("/user/Silvio").send(plant)
         expect(newResponse.statusCode).toBe(409)
         const message: IMessage = newResponse.body
         expect(message.type).toBe(MessageType.CONFLICT)

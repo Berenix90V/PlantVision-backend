@@ -31,28 +31,7 @@ router.get("/plant/:username/:plantName", async(req: Request, res: Response) => 
     }
 })
 
-router.post("/plant/:username", async (req: Request, res: Response) => {
-    const username = req.params.username
-    const user = await User.findOne({username: username})
-    if(!user)
-        return res.status(404).json(not_found("User not found"))
-    else {
-        const {name, description, attributes, sensor} = req.body
-        if(user.plants.find(p => p.name == name) == undefined) {
-            const plant = new Plant({
-                name: name,
-                description: description,
-                attributes: attributes,
-                sensor: sensor
-            })
-            user.plants.push(plant)
-            user.save().then(() => res.status(201).json(success("Plant added to user")))
-        }
-        else return res.status(409).json(conflict("Plant already exists"))
-    }
-})
-
-router.put("/plant/:username/:plantName", async (req: Request, res: Response) => {
+router.post("/plant/:username/:plantName", async (req: Request, res: Response) => {
     const name = req.params.username
     const plantName = req.params.plantName
     const {airHumidity, soilMoisture, airTemperature, lightIntensity} = req.body
@@ -88,7 +67,24 @@ router.delete("/plant/:username",async (req:Request, res: Response) => {
             {$set: {plants: []}}
         ).then((_) => res.status(200).json(success("Plants deleted successfully")))
     }
-    
+})
+
+router.delete("/plant/:username/:plantName", async (req: Request, res: Response) => {
+    const name = req.params.username
+    const plantName = req.params.plantName
+
+    const user = await User.findOne({username: name, "plants.name": plantName})
+    if(!user) {
+        return res.status(404).json(not_found(`User ${name} with plant {plantName} not found`))
+    }
+    else {
+        User.updateOne({username: name},
+            {
+                $pull : {"plants": {"name": plantName}}
+            }
+        ).then((_) => res.status(200).json(success("Plant removed correctly")))
+    }
+
 })
 
 export {router as plantRouter }

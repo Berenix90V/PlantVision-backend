@@ -50,6 +50,8 @@ export const plantSchema = new mongoose.Schema<IPlant, PlantsModelType>({
         unique: false,
         sparse: true
     }
+},{
+    timestamps: true
 })
 
 const Plant = mongoose.model<IPlant, PlantsModelType>('Plant', plantSchema)

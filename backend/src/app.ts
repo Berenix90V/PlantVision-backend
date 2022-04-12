@@ -1,6 +1,7 @@
 import express, { json, urlencoded } from "express"
 import { plantRouter } from "./routes/plant"
 import { userRouter } from "./routes/user"
+import {sensorRouter} from "./routes/sensor";
 
 
 /**
@@ -15,8 +16,9 @@ app.use(urlencoded({
 /**
  * Adds the routes
  */
- app.use(userRouter)
- app.use(plantRouter)
+app.use(userRouter)
+app.use(plantRouter)
+app.use(sensorRouter)
 
 
 export default app

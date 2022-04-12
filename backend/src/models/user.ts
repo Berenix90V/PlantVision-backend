@@ -33,6 +33,8 @@ const userSchema = new mongoose.Schema<IUser, UsersModelType>({
         unique: false,
         sparse: true
     }
+},{
+    timestamps: true,
 })
 
 const User = mongoose.model<IUser, UsersModelType>('User', userSchema)
