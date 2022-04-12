@@ -31,7 +31,7 @@ router.get("/plant/:username/:plantName", async(req: Request, res: Response) => 
     }
 })
 
-router.put("/plant/:username/:plantName", async (req: Request, res: Response) => {
+router.post("/plant/:username/:plantName", async (req: Request, res: Response) => {
     const name = req.params.username
     const plantName = req.params.plantName
     const {airHumidity, soilMoisture, airTemperature, lightIntensity} = req.body

@@ -51,7 +51,7 @@ paths:
                   "type": "NOT_FOUND",
                   "message": "User not found"
                 }
-    put:
+    post:
       tags:
       - User
       - Plants
@@ -277,7 +277,7 @@ paths:
                   "message": "User not found"
                 }
   /plant/{username}/{plantName}:
-     put:
+     post:
       tags:
       - Plants
       - Sensors
@@ -471,6 +471,7 @@ paths:
                   "type": "NOT_FOUND",
                   "message": "User ... with plant ... not found"
                 }
+
 components:
   schemas:
     UserNoPassword:

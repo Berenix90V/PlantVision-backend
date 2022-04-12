@@ -8,7 +8,7 @@ import {plant, sensor, user} from './base'
 describe('Plants', () => {
     it("should be found if user exists", async () => {
         await User.create(user)
-        await request(app).put("/user/Silvio").send(plant)
+        await request(app).post("/user/Silvio").send(plant)
         const response = await request(app).get("/plant/Silvio")
         expect(response.statusCode).toBe(200)
         const responseMessage: [IPlant] = response.body
@@ -22,7 +22,7 @@ describe('Plants', () => {
     })
     it("should be deleted if user is found", async () => {
         await User.create(user)
-        await request(app).put("/user/Silvio").send(plant)
+        await request(app).post("/user/Silvio").send(plant)
         let response = await request(app).delete("/plant/Silvio")
         expect(response.statusCode).toBe(200)
         const responseMessage: IMessage = response.body
@@ -43,7 +43,7 @@ describe('Plants', () => {
 describe('Plant', () => { 
     it("should be found when user and plant exist", async () => {
         await User.create(user)
-        await request(app).put("/user/Silvio").send(plant)
+        await request(app).post("/user/Silvio").send(plant)
         const response = await request(app).get("/plant/Silvio/Sage")
         expect(response.statusCode).toBe(200)
         const responseMessage: IPlant = response.body
@@ -80,7 +80,7 @@ describe('Plant', () => {
     })
     it("should be deleted when plant and user exist", async () => {
         await User.create(user)
-        await request(app).put("/user/Silvio").send(plant)
+        await request(app).post("/user/Silvio").send(plant)
         let response = await request(app).get("/plant/Silvio")
         expect(response.statusCode).toBe(200)
         let plants: [IPlant] = response.body
