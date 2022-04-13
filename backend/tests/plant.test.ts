@@ -2,13 +2,13 @@ import { IPlant, Plant } from '../src/models/plant'
 import app from '../src/app'
 import request from 'supertest'
 import { MessageType, IMessage } from '../src/models/message'
-import { User } from '../src/models/user'
+import {IUser, User} from '../src/models/user'
 import {plant, sensor, user} from './base'
 
 describe('Plants', () => {
     it("should be found if user exists", async () => {
         await User.create(user)
-        await request(app).post("/user/Silvio").send(plant)
+        await request(app).post("/plant/Silvio").send(plant)
         const response = await request(app).get("/plant/Silvio")
         expect(response.statusCode).toBe(200)
         const responseMessage: [IPlant] = response.body
@@ -43,7 +43,7 @@ describe('Plants', () => {
 describe('Plant', () => { 
     it("should be found when user and plant exist", async () => {
         await User.create(user)
-        await request(app).post("/user/Silvio").send(plant)
+        await request(app).post("/plant/Silvio").send(plant)
         const response = await request(app).get("/plant/Silvio/Sage")
         expect(response.statusCode).toBe(200)
         const responseMessage: IPlant = response.body
@@ -80,7 +80,7 @@ describe('Plant', () => {
     })
     it("should be deleted when plant and user exist", async () => {
         await User.create(user)
-        await request(app).post("/user/Silvio").send(plant)
+        await request(app).post("/plant/Silvio").send(plant)
         let response = await request(app).get("/plant/Silvio")
         expect(response.statusCode).toBe(200)
         let plants: [IPlant] = response.body
@@ -93,5 +93,30 @@ describe('Plant', () => {
         expect(response.statusCode).toBe(200)
         plants = response.body
         expect(plants).toHaveLength(0)
+    })
+    it("should be added when user exists", async () => {
+        await User.create(user)
+        const response = await request(app).post("/plant/Silvio").send(plant)
+        expect(response.statusCode).toBe(200)
+        const newResponse = await request(app).get("/user/Silvio")
+        expect(newResponse.statusCode).toBe(200)
+        const modUser: IUser = newResponse.body
+        expect(modUser.username).toBe(user.username)
+        expect(modUser.plants).toHaveLength(1)
+    })
+    it("should not be added when user doesn't exist", async () => {
+        const response = await request(app).post("/plant/Silvio").send(plant)
+        expect(response.statusCode).toBe(404)
+        const message: IMessage = response.body
+        expect(message.type).toBe(MessageType.NOT_FOUND)
+    })
+    it("should conflict when adding an existing plant", async () => {
+        await User.create(user)
+        const response = await request(app).post("/plant/Silvio").send(plant)
+        expect(response.statusCode).toBe(200)
+        const newResponse = await request(app).post("/plant/Silvio").send(plant)
+        expect(newResponse.statusCode).toBe(409)
+        const message: IMessage = newResponse.body
+        expect(message.type).toBe(MessageType.CONFLICT)
     })
 })

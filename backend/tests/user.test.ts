@@ -37,31 +37,6 @@ describe('User', () => {
         const userData: IMessage = response.body
         expect(userData.type).toBe(MessageType.NOT_FOUND)
     })
-    it("should add a new plant", async () => {
-        await User.create(user)
-        const response = await request(app).post("/user/Silvio").send(plant)
-        expect(response.statusCode).toBe(200)
-        const newResponse = await request(app).get("/user/Silvio")
-        expect(newResponse.statusCode).toBe(200)
-        const modUser: IUser = newResponse.body
-        expect(modUser.username).toBe(user.username)
-        expect(modUser.plants).toHaveLength(1)
-    })
-    it("should not be found when adding a plant to a non existing user", async () => {
-        const response = await request(app).post("/user/Silvio").send(plant)
-        expect(response.statusCode).toBe(404)
-        const message: IMessage = response.body
-        expect(message.type).toBe(MessageType.NOT_FOUND) 
-    })
-    it("should conflict when adding an existing plant", async () => {
-        await User.create(user)
-        const response = await request(app).post("/user/Silvio").send(plant)
-        expect(response.statusCode).toBe(200)
-        const newResponse = await request(app).post("/user/Silvio").send(plant)
-        expect(newResponse.statusCode).toBe(409)
-        const message: IMessage = newResponse.body
-        expect(message.type).toBe(MessageType.CONFLICT)
-    })
     it("should be deleted when exists",async () => {
         await User.create(user)
         const response = await request(app).delete("/user/Silvio")
