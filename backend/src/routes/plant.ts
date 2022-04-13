@@ -6,7 +6,14 @@ import { ISensor, Sensor } from '../models/sensors'
 
 const router = express.Router()
 
-router.get("/plant/:username",async (req: Request, res: Response) => {
+/**
+ * Fetches all user plants
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 404 with a not found message if the user is not found,
+ * HTTP 200 with the user plants otherwise
+ */
+const getPlantsByUsername = async (req: Request, res: Response) => {
     const name = req.params.username
     const user = await User.findOne({username: name})
     if(!user)
@@ -14,9 +21,16 @@ router.get("/plant/:username",async (req: Request, res: Response) => {
     else {
         return res.status(200).json(user.plants)
     }
-})
+}
 
-router.get("/plant/:username/:plantName", async(req: Request, res: Response) => {
+/**
+ * Fetches a user plant
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 404 with a not found message if the user or the plant are not found,
+ * HTTP 200 with the user plant otherwise
+ */
+const getPlantByUsername = async(req: Request, res: Response) => {
     const name = req.params.username
     const plantName = req.params.plantName
     const user = await User.findOne({username: name})
@@ -29,57 +43,18 @@ router.get("/plant/:username/:plantName", async(req: Request, res: Response) => 
         else
             return res.status(404).json(not_found("Plant not found"))
     }
-})
+}
 
-router.post("/plant/:username", async (req: Request, res: Response) => {
+/**
+ * Deletes all user plants
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 404 with a not found message if the user is not found,
+ * HTTP 200 with a success message otherwise
+ */
+const deletePlantsByUsername = async (req:Request, res: Response) => {
     const username = req.params.username
-    const user = await User.findOne({username: username})
-    if(!user)
-        return res.status(404).json(not_found("User not found"))
-    else {
-        const {name, description, attributes, sensor} = req.body
-        if(user.plants.find(p => p.name == name) == undefined) {
-            const plant = new Plant({
-                name: name,
-                description: description,
-                attributes: attributes,
-                sensor: sensor
-            })
-            user.plants.push(plant)
-            user.save().then(() => res.status(201).json(success("Plant added to user")))
-        }
-        else return res.status(409).json(conflict("Plant already exists"))
-    }
-})
 
-router.put("/plant/:username/:plantName", async (req: Request, res: Response) => {
-    const name = req.params.username
-    const plantName = req.params.plantName
-    const {airHumidity, soilMoisture, airTemperature, lightIntensity} = req.body
-
-    const user = await User.findOne({username: name})
-   
-    if(!user)
-        return res.status(404).json(not_found("User not found"))
-    else {
-        const plant = user.plants.find((p) => p.name == plantName);
-        if(plant != undefined) {
-            plant.sensor?.push(new Sensor({
-                airHumidity: airHumidity,
-                soilMoisture: soilMoisture,
-                airTemperature: airTemperature,
-                lightIntensity: lightIntensity
-            }))
-            user!.save().then(() => res.status(200).json(success("Plant added")))
-        }
-        else
-            return res.status(404).json(not_found("Plant not found"))
-    }
-})
-
-router.delete("/plant/:username",async (req:Request, res: Response) => {
-    const username = req.params.username
-    
     if(!await User.exists({username: username})) {
         return res.status(404).json(not_found("User not found"))
     }
@@ -88,7 +63,65 @@ router.delete("/plant/:username",async (req:Request, res: Response) => {
             {$set: {plants: []}}
         ).then((_) => res.status(200).json(success("Plants deleted successfully")))
     }
-    
-})
+}
+
+/**
+ * Deletes a user plant
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 404 with a not found message if the user or the plant are not found,
+ * HTTP 200 with the user plant otherwise
+ */
+const deletePlantByUsername = async (req: Request, res: Response) => {
+    const name = req.params.username
+    const plantName = req.params.plantName
+
+    const user = await User.findOne({username: name, "plants.name": plantName})
+    if(!user) {
+        return res.status(404).json(not_found(`User ${name} with plant {plantName} not found`))
+    }
+    else {
+        User.updateOne({username: name},
+            {
+                $pull : {"plants": {"name": plantName}}
+            }
+        ).then((_) => res.status(200).json(success("Plant removed correctly")))
+    }
+
+}
+
+/**
+ * Adds a new plant to a user
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 201 with a success message if the user was added correctly,
+ * HTTP 409 with a conflict message if the user already exists, HTTP 404 with a not found message if the user is not found
+ */
+const addPlant = async (req: Request, res: Response) => {
+    const username = req.params.username
+    const {name, description, sensor} = req.body
+
+    if (!await User.exists({ username: username })) {
+        return res.status(404).json(not_found("User not found"))
+    }
+    else {
+        const user = await User.findOne({ username: username })
+        if (user!.plants.find(plant => plant.name == name))
+            return res.status(409).json(conflict("Plant already exists"))
+        user!.plants.push(new Plant({
+            name: name,
+            description: description,
+            sensor: sensor
+        }))
+        return user!.save().then(() => res.status(200).json(success("Plant added")))
+
+    }
+}
+
+router.get("/plant/:username",getPlantsByUsername)
+router.get("/plant/:username/:plantName", getPlantByUsername)
+router.delete("/plant/:username", deletePlantsByUsername)
+router.delete("/plant/:username/:plantName", deletePlantByUsername)
+router.post("/plant/:username", addPlant)
 
 export {router as plantRouter }

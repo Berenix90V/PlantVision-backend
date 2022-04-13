@@ -1,11 +1,17 @@
 import express, { Request, Response } from 'express'
 import { not_found, success, conflict } from '../models/message'
-import { Plant } from '../models/plant'
 import { User } from '../models/user'
 
 const router = express.Router()
 
-router.get("/user/:username", async (req: Request, res: Response) => {
+/**
+ * Fetches the user by its unique username
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 200 response with the user's data in JSON if the user is found,
+ * HTTP 404 with a not found message otherwise
+ */
+const fetchUserByName = async (req: Request, res: Response) => {
     const name = req.params.username
 
     const user = await User.findOne({ username: name })
@@ -19,9 +25,16 @@ router.get("/user/:username", async (req: Request, res: Response) => {
             plants: user.plants
         })
     }
-})
+}
 
-router.post("/user", async (req: Request, res: Response) => {
+/**
+ * Adds a new user
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 201 with a success message if the user was added correctly,
+ * HTTP 409 with a conflict message if the user already exists
+ */
+const addUser = async (req: Request, res: Response) => {
     const { username, password, plants } = req.body
 
     if (await User.exists({ username: username })) {
@@ -35,40 +48,30 @@ router.post("/user", async (req: Request, res: Response) => {
         })
         return user.save().then(() => res.status(201).json(success("User created")))
     }
-})
+}
 
-router.put("/user/:username", async (req: Request, res: Response) => {
+/**
+ * Deletes a user
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 204 response with if the user is deleted correctly,
+ * HTTP 404 with a not found message if the user doesn't exist
+ */
+const deleteUser = async (req:Request, res: Response) => {
     const username = req.params.username
-    const {name, description, sensor} = req.body
 
-    if (!await User.exists({ username: username })) {
-        return res.status(404).json(not_found("User not found"))
-    }
-    else {
-        const user = await User.findOne({ username: username })
-        if (user!.plants.find(plant => plant.name == name))
-            return res.status(409).json(conflict("Plant already exists"))
-        user!.plants.push(new Plant({
-            name: name,
-            description: description,
-            sensor: sensor
-        }))
-        return user!.save().then(() => res.status(200).json(success("Plant added")))
-        
-    }
-})
-
-router.delete("/user/:username",async (req:Request, res: Response) => {
-    const username = req.params.username
-    
     if(!await User.exists({username: username})) {
         return res.status(404).json(not_found("User not found"))
     }
     else {
         return User.deleteOne({username: username})
-        .then(() => res.sendStatus(204))
+            .then(() => res.sendStatus(204))
     }
-    
-})
+
+}
+
+router.get("/user/:username", fetchUserByName)
+router.post("/user", addUser)
+router.delete("/user/:username", deleteUser)
 
 export { router as userRouter }

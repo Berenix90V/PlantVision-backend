@@ -1,6 +1,15 @@
 import mongoose from 'mongoose'
 import { plantSchema, IPlant } from "./plant";
 
+/**
+ * Defines a user. A user is a collection of properties that define a single user. Only the strictly necessary data is being collected,
+ * specifically:
+ * - Username
+ * - Password
+ *
+ * No personal data shall be collected since there is no need for it.
+ * @todo Add email to allow for password reset and recovery
+ */
 export interface IUser {
     username: string,
     password: string,
@@ -33,6 +42,8 @@ const userSchema = new mongoose.Schema<IUser, UsersModelType>({
         unique: false,
         sparse: true
     }
+},{
+    timestamps: true,
 })
 
 const User = mongoose.model<IUser, UsersModelType>('User', userSchema)

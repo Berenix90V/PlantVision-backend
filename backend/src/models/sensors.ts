@@ -1,9 +1,14 @@
 import mongoose from 'mongoose'
 
 /**
- * The document format of a sensor in the mongodb database
+ * Defines a sensor. A sensor is a collection of sensor readings, specifically:
+ * - Air temperature and humidity
+ * - Soil moisture
+ * - Light intensity
+ *
+ * This data is sent by the sensors through the appropriate HTTP request and will get inserted into this structure, for
+ * storing and better accessing of the individual values in the front end of the application
  */export interface ISensor {
-    timestamp?: Date,
     airHumidity: number,
     soilMoisture: number,
     airTemperature: number,
@@ -11,7 +16,7 @@ import mongoose from 'mongoose'
 }
 
 /**
- * The schema of the sensor subdocument in the database
+ * The schema of the sensor sub document in the database
  */
 const sensorSchema = new mongoose.Schema<ISensor>({
     airHumidity: {
@@ -30,10 +35,8 @@ const sensorSchema = new mongoose.Schema<ISensor>({
         type: Number,
         required: true
     },
-    timestamp: {
-        type: Date,
-        default: Date.now()
-    }
+},{
+    timestamps: true,
 })
 
 const Sensor = mongoose.model("Sensor", sensorSchema)

@@ -1,24 +1,26 @@
 import mongoose from 'mongoose'
 
 /**
- * The document format of a sensor in the mongodb database
- */export interface IAttribute {
-    timestamp?: Date,
-    attributes?: [String],
+ * Defines an attribute. An attribute is a combination of a score from 0 to 10 of a plant, which determines the condition
+ * of the plant according to the user, a list of key phrases that the user can add, to give more insight on the plant, and
+ * optionally an image of the day.
+ */
+export interface IAttribute {
+    attributes: String[],
+    score?: number
     imageOfTheDay?: {
         data: Buffer,
         contentType: String
-    }
+    },
+    createdAt?: Date
 }
 
 /**
- * The schema of the sensor subdocument in the database
+ * Defines a MongoDB Attribute schema
  */
 const attributeSchema = new mongoose.Schema<IAttribute>({
-    
-    timestamp: {
-        type: Date,
-        default: Date.now()
+    score: {
+        type: Number
     },
     attributes: {
         type: [String]
@@ -27,6 +29,10 @@ const attributeSchema = new mongoose.Schema<IAttribute>({
         data: Buffer,
         contentType: String
     }
+}, {
+    timestamps: true,
 })
 
-export { attributeSchema }
+const Attribute = mongoose.model("Attribute", attributeSchema);
+
+export { Attribute, attributeSchema }

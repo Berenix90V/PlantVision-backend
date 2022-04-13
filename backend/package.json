@@ -7,7 +7,7 @@
     "start": "ts-node-dev src/index.ts",
     "test": "jest --detectOpenHandles",
     "test:ci": "jest --config ./jest.config.ts --collectCoverage --coverageDirectory=\"./coverage\" --ci --reporters=default --reporters=jest-junit --watchAll=false",
-    "start:docs": "redoc-cli bundle -o public/index.html docs/api.yaml"
+    "start:docs": "redoc-cli build -o public/index.html docs/api.yaml"
   },
   "keywords": [],
   "author": "",
