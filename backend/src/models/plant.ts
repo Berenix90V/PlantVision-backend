@@ -34,10 +34,6 @@ export const plantSchema = new mongoose.Schema<IPlant, PlantsModelType>({
     description: {
         type: String,
     },
-    createdAt: {
-        type: Date,
-        default: Date.now()
-    },
     sensor: {
         type: [sensorSchema],
         default: [],

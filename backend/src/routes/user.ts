@@ -37,27 +37,6 @@ router.post("/user", async (req: Request, res: Response) => {
     }
 })
 
-router.post("/user/:username", async (req: Request, res: Response) => {
-    const username = req.params.username
-    const {name, description, sensor} = req.body
-
-    if (!await User.exists({ username: username })) {
-        return res.status(404).json(not_found("User not found"))
-    }
-    else {
-        const user = await User.findOne({ username: username })
-        if (user!.plants.find(plant => plant.name == name))
-            return res.status(409).json(conflict("Plant already exists"))
-        user!.plants.push(new Plant({
-            name: name,
-            description: description,
-            sensor: sensor
-        }))
-        return user!.save().then(() => res.status(200).json(success("Plant added")))
-        
-    }
-})
-
 router.delete("/user/:username",async (req:Request, res: Response) => {
     const username = req.params.username
     

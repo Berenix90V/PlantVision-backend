@@ -1,24 +1,18 @@
 import mongoose from 'mongoose'
 
-/**
- * The document format of a sensor in the mongodb database
- */export interface IAttribute {
-    timestamp?: Date,
-    attributes?: [String],
+export interface IAttribute {
+    attributes: String[],
+    score?: number
     imageOfTheDay?: {
         data: Buffer,
         contentType: String
-    }
+    },
+    createdAt?: Date
 }
 
-/**
- * The schema of the sensor subdocument in the database
- */
 const attributeSchema = new mongoose.Schema<IAttribute>({
-    
-    timestamp: {
-        type: Date,
-        default: Date.now()
+    score: {
+        type: Number
     },
     attributes: {
         type: [String]
@@ -27,6 +21,10 @@ const attributeSchema = new mongoose.Schema<IAttribute>({
         data: Buffer,
         contentType: String
     }
+}, {
+    timestamps: true,
 })
 
-export { attributeSchema }
+const Attribute = mongoose.model("Attribute", attributeSchema);
+
+export { Attribute, attributeSchema }

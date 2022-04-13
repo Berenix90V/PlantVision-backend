@@ -31,10 +31,6 @@ const sensorSchema = new mongoose.Schema<ISensor>({
     },
 },{
     timestamps: true,
-    timeseries: {
-        timeField: "createdAt",
-        granularity: "seconds"
-    }
 })
 
 const Sensor = mongoose.model("Sensor", sensorSchema)

@@ -4,6 +4,7 @@ import {beforeAll} from "@jest/globals";
 import {IUser} from "../src/models/user";
 import {IPlant} from "../src/models/plant";
 import {ISensor} from "../src/models/sensors";
+import {IAttribute} from "../src/models/attribute";
 
 export let mongoServer: MongoMemoryServer
 export let con: Mongoose
@@ -46,4 +47,9 @@ export const sensor: ISensor = {
     airHumidity: 87,
     lightIntensity: 100,
     soilMoisture: 42
+}
+
+export const attribute: IAttribute = {
+    score: 8.5,
+    attributes: ['green', 'likes sun', 'moist terrain'],
 }
