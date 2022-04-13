@@ -3,7 +3,7 @@ import { attributeSchema, IAttribute } from './attribute'
 import { sensorSchema, ISensor } from './sensors'
 
 /**
- * The document format of a plant in the mongodb database
+ * Defines a plant. A plant is an entity that defines a user-owned plant. It contains sensor readings as well as its attributes
  */
 export interface IPlant {
     name: string,
@@ -14,7 +14,7 @@ export interface IPlant {
 }
 
 /**
- * These types allow to have the sensor as a subdocument
+ * These types allow to have the sensor as a sub document
  */
 type PlantsDocumentsProps = {
     sensor: mongoose.Types.DocumentArray<ISensor>,

@@ -6,16 +6,28 @@ import {IPlant} from "../src/models/plant";
 import {ISensor} from "../src/models/sensors";
 import {IAttribute} from "../src/models/attribute";
 
+/**
+ * In memory mongodb database and connection
+ */
 export let mongoServer: MongoMemoryServer
 export let con: Mongoose
 
+/**
+ * Set a reasonable timeout in case the in memory database creation is slow
+ */
 jest.setTimeout(20 * 1000)
 
+/**
+ * Before the tests are executed, create the database and open a connection to it
+ */
 beforeAll(async () => {
     mongoServer = await MongoMemoryServer.create()
     con = await mongoose.connect(mongoServer.getUri(), { dbName: "Plants" })
 })
 
+/**
+ * After each test, clean the database
+ */
 afterEach(async () => {
     const collections = mongoose.connection.collections;
 
@@ -26,6 +38,9 @@ afterEach(async () => {
     }
 })
 
+/**
+ * After all the tests are done, close the connection and delete the in memory database
+ */
 afterAll(async () => {
     if (con)
         await con.disconnect()

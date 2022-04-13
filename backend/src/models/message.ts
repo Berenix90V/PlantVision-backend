@@ -1,9 +1,16 @@
+/**
+ * Defines a message type
+ */
 export enum MessageType {
     NOT_FOUND = "Not found",
     CONFLICT = "Already present",
     OK = "OK"
 }
 
+/**
+ * Defines a message that will get sent to the client when particular conditions are met, such as not finding the
+ * requested resource or resources conflicting with existing data
+ */
 export interface IMessage {
     type: MessageType,
     message: string

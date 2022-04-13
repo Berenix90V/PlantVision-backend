@@ -7,7 +7,14 @@ const router = express.Router()
 
 const basePath = "/attribute/:username/:plantName"
 
-router.get(basePath, async (req: Request, res: Response) => {
+/**
+ * Fetches the latest attribute data
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 404 with a not found message if either the user or the plant don't exist,
+ * HTTP 200 with the attribute data otherwise
+ */
+const fetchLatest = async (req: Request, res: Response) => {
     const userName = req.params.username
     const plantName = req.params.plantName
 
@@ -18,9 +25,15 @@ router.get(basePath, async (req: Request, res: Response) => {
         const attributes: [IAttribute] = user.plants.find(p => p.name == plantName)!.attributes!;
         return res.status(200).json(attributes.at(attributes.length - 1))
     }
-})
-
-router.post(basePath, async (req: Request, res: Response) => {
+}
+/**
+ * Adds a new attribute to a plant
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 404 with a not found message if either the user or the plant don't exist,
+ * HTTP 200 with a success message otherwise
+ */
+const addAttribute = async (req: Request, res: Response) => {
     const name = req.params.username
     const plantName = req.params.plantName
     const {score, attributes} = req.body
@@ -38,7 +51,9 @@ router.post(basePath, async (req: Request, res: Response) => {
         plant.attributes!.push(attribute)
         user!.save().then(() => res.status(200).json(success("Attribute added")))
     }
-})
+}
 
+router.get(basePath, fetchLatest)
+router.post(basePath, addAttribute)
 
 export { router as AttributeRouter }
