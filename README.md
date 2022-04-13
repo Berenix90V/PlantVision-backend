@@ -4,8 +4,8 @@ This project aims at creating a platform in which users can install a small pack
 
 ## Authors
 
-Cristian Nicolae Lupascu (<cristiannicolae.lupascu@edu.turkuamk.fi>, <880140@stud.unive.it>)
-Veronica Zanella (<vernoica.zanella@edu.turkuamk.fi>, <826582@stud.unive.it>)
+- Cristian Nicolae Lupascu (<cristiannicolae.lupascu@edu.turkuamk.fi>, <880140@stud.unive.it>)
+- Veronica Zanella (<vernoica.zanella@edu.turkuamk.fi>, <826582@stud.unive.it>)
 
 ## Deployment
 
