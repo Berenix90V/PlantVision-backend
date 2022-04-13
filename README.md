@@ -1,84 +1,171 @@
+---
+attachments: [db.png]
+title: Smart Plants
+created: '2022-04-03T15:52:09.534Z'
+modified: '2022-04-13T09:41:20.752Z'
+---
+
 # Smart Plants
 
-Smart plants is a group project developed for the Embedded linux course at [Tuku University of Applied Sciences](tuas.fi).
+## Backend
 
-## Project structure
+For the backend we decided to go with Node.JS and Express with Typescript. Using Typescript allowed us to have type and null safety, preventing us from throwing exceptions and encapsulating our code in try-catch blocks. 
 
-The project is divided in 3 pieces: Backend, frontend and embedded.
+### Routes
 
-### Backend
+Using Express, defining routes is very easy. An example of `GET` route looks like this:
+```typescript
+import express, {Request, Response} from 'express'
+import {User} from '../models/user/'
 
-The backend code manages a REST API that interacts with a [time series database](https://en.wikipedia.org/wiki/Time_series_database) to store and retrieve sensor data efficiently.
+const router = express.Router()
 
-#### Stack
+/**
+ * Fetches the user by its unique username
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 200 response with the user's data in JSON if the user is found,
+ * HTTP 404 with a not found message otherwise
+ */
+const fetchByName = async (req: Request, res: Response) => {
+  const username = req.params.username
+  
+  const user = await User.findOne({username: username})
 
-The backend code is written in [TypeScript](https://www.typescriptlang.org/), so to give the application a robut type check, especially important when it comes to unstructured data.
+  if(!user)
+    return res.status(404).json(not_found(`User ${username} not found`))
+  else
+    return res.status(200).json({
+      username: user.username,
+      plants: user.plants
+    })
+}
 
-The database used is [MongoDb](https://www.mongodb.com/), since from version `5.0` allows time series data documents.
+router.get("/user/:username", fetchUserByName)
 
-Notable libraries used include:
-
-- [Express](https://expressjs.com) provides a minimal framework to build the API
-- [mongoose](https://mongoosejs.com/) provides a driver for the mongodb database, allowing to map objects to documents for more security and consistency
-- [Jest](https://jestjs.io/) provides a framework for unit and coverage testing
-- [mongodb-memory-server](https://github.com/nodkz/mongodb-memory-server) provides capabilities to build and manage in-memory mongodb instances for mock testing
-
-#### Routes
-
-The backend REST API exposes two routes: `/plants` and `/sensors`.
-
-## Installation
-
-Make sure you have `docker` and `docker-compose` installed. If not:
-
-- On windows install [Docker Desktop](https://docs.docker.com/desktop/windows/install/)
-- On Linux: `sudo apt update;  sudo apt install docker docker-compose`
-
-> From now on linux commands are used, but are identical to a Windows installation of docker, you just need docker desktop running
-
-Check that you have correctly installed `docker` and `docker-compose`:
-
-```sh
-docker -v
-docker-compose -v
+export {router as userRouter}
 ```
 
-should output their respective versions.
+This route will then be passed to the application as a `middleware`:
 
-Then execute `docker-compose up -d` in the `backend` directory:
-
-```sh
-cd backend/
-docker-compose up -d
+```typescript
+import {userRouter} from './routes/user'
+...
+const app = express()
+...
+app.use(userRouter)
 ```
 
-After it has downloaded check that the containers `database` and `node-dev` are up and running:
+For the full documentation refer to [the routes folder](https://git.dc.turkuamk.fi/edu.veronica.zanella/smart-plants/-/tree/master/backend/src/routes) and to the ReDoc [API documentation](https://git.dc.turkuamk.fi/edu.veronica.zanella/smart-plants/-/blob/master/backend/public/index.html). (**here Gitlab Pages would have beed the best option, but it is yet to be implemented.**)
 
-```sh
-docker-compose ps
+
+### Testing
+
+To test our backend we used [Jest](https://jestjs.io/), a renowned testing library that's easy and intuitive to use and requires almost no configuration. Here's an example of a test:
+
+```typescript
+const user: IUser = {
+    username: "Silvio",
+    password: "test",
+    plants: []
+}
+
+describe('User', () => {
+    it("should be created if doesn't exist", async () => {
+        const response = await request(app).post("/user").send(user)
+        expect(response.statusCode).toBe(201)
+        const message: IMessage = response.body
+        expect(message.type).toBe(MessageType.OK)
+    })
+})
 ```
 
-should give an output similar to this:
+For more tests check [the tests folder](https://git.dc.turkuamk.fi/edu.veronica.zanella/smart-plants/-/tree/master/backend/tests).
 
-```sh
-         Name                        Command               State           Ports
------------------------------------------------------------------------------------------
-smart-plants_database_1   docker-entrypoint.sh mongod      Up      27017/tcp
-smart-plants_node-web_1   docker-entrypoint.sh npm start   Up      0.0.0.0:5000->5000/tcp
+### Database
+
+For the database we chose to use MongoDB, because it has less contraints and cheks, allowing for more speed and better data acquisition, essential in our use case. The schema of the database can be conveniently described using a pseudo JSON notation:
+
+```typescript
+[
+  User: {
+    name: string,
+    password: hashed string,
+    plants: <Optional>[
+      Plant: {
+        name: string
+        description: <Optional> string,
+        sensors: [
+          Sensor: {
+            airTemperature: float,
+            airHumdity: float,
+            lightIntensity: float,
+            soilMoisture: float
+          }
+        ],
+        attributes: [
+          Attribute: {
+            score: integer,
+            attributes: <Optional> [string],
+            imageOfTheDay: <Optional> image
+          }
+        ]
+      }
+    ],
+  }
+]
 ```
 
-If the outputs match, visit [http://localhost:5000/plants](http://localhost:5000/plants) and check that there is an empty JSON array as output.
+To achieve this schema we used sub documents, and, since one plant belongs only to one user, and their sensor readings and attributes belong to that one plant, it makes it the best choice.
 
-**You are set!**
+We chose to collect the bare minimum amount of data from the user, since there is no concrete need for more than a username and a password. We might add an email in the future to allow for password recovery and reset. 
 
-## TODO
+In Typescript, these objects are defined using interfaces, specifically:
 
-- [ ] Backend
-  - [X] Routes
-  - [X] Database
-  - [X] Documentation
-  - [X] Deployment using Docker
-  - [X] CI/CD
-  - [X] Unit and Coverage testing for routes
-- [ ] Frontend
-- [ ] Embedded
+```typescript
+interface IAttribute {
+    attributes: String[],
+    score?: number
+    imageOfTheDay?: {
+        data: Buffer,
+        contentType: String
+    },
+    createdAt?: Date
+}
+
+interface IPlant {
+    name: string,
+    description?: string,
+    createdAt?: Date,
+    sensor?: [ISensor],
+    attributes?: [IAttribute]
+}
+
+interface ISensor {
+    airHumidity: number,
+    soilMoisture: number,
+    airTemperature: number,
+    lightIntensity: number,
+}
+
+interface IUser {
+    username: string,
+    password: string,
+    createdAt?: Date,
+    plants?: IPlant[]
+}
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+
