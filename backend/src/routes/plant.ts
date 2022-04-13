@@ -6,7 +6,14 @@ import { ISensor, Sensor } from '../models/sensors'
 
 const router = express.Router()
 
-router.get("/plant/:username",async (req: Request, res: Response) => {
+/**
+ * Fetches all user plants
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 404 with a not found message if the user is not found,
+ * HTTP 200 with the user plants otherwise
+ */
+const getPlantsByUsername = async (req: Request, res: Response) => {
     const name = req.params.username
     const user = await User.findOne({username: name})
     if(!user)
@@ -14,9 +21,16 @@ router.get("/plant/:username",async (req: Request, res: Response) => {
     else {
         return res.status(200).json(user.plants)
     }
-})
+}
 
-router.get("/plant/:username/:plantName", async(req: Request, res: Response) => {
+/**
+ * Fetches a user plant
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 404 with a not found message if the user or the plant are not found,
+ * HTTP 200 with the user plant otherwise
+ */
+const getPlantByUsername = async(req: Request, res: Response) => {
     const name = req.params.username
     const plantName = req.params.plantName
     const user = await User.findOne({username: name})
@@ -29,11 +43,18 @@ router.get("/plant/:username/:plantName", async(req: Request, res: Response) => 
         else
             return res.status(404).json(not_found("Plant not found"))
     }
-})
+}
 
-router.delete("/plant/:username",async (req:Request, res: Response) => {
+/**
+ * Deletes all user plants
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 404 with a not found message if the user is not found,
+ * HTTP 200 with a success message otherwise
+ */
+const deletePlantsByUsername = async (req:Request, res: Response) => {
     const username = req.params.username
-    
+
     if(!await User.exists({username: username})) {
         return res.status(404).json(not_found("User not found"))
     }
@@ -42,9 +63,16 @@ router.delete("/plant/:username",async (req:Request, res: Response) => {
             {$set: {plants: []}}
         ).then((_) => res.status(200).json(success("Plants deleted successfully")))
     }
-})
+}
 
-router.delete("/plant/:username/:plantName", async (req: Request, res: Response) => {
+/**
+ * Deletes a user plant
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 404 with a not found message if the user or the plant are not found,
+ * HTTP 200 with the user plant otherwise
+ */
+const deletePlantByUsername = async (req: Request, res: Response) => {
     const name = req.params.username
     const plantName = req.params.plantName
 
@@ -60,9 +88,16 @@ router.delete("/plant/:username/:plantName", async (req: Request, res: Response)
         ).then((_) => res.status(200).json(success("Plant removed correctly")))
     }
 
-})
+}
 
-router.post("/plant/:username", async (req: Request, res: Response) => {
+/**
+ * Adds a new plant to a user
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 201 with a success message if the user was added correctly,
+ * HTTP 409 with a conflict message if the user already exists, HTTP 404 with a not found message if the user is not found
+ */
+const addPlant = async (req: Request, res: Response) => {
     const username = req.params.username
     const {name, description, sensor} = req.body
 
@@ -81,6 +116,12 @@ router.post("/plant/:username", async (req: Request, res: Response) => {
         return user!.save().then(() => res.status(200).json(success("Plant added")))
 
     }
-})
+}
+
+router.get("/plant/:username",getPlantsByUsername)
+router.get("/plant/:username/:plantName", getPlantByUsername)
+router.delete("/plant/:username", deletePlantsByUsername)
+router.delete("/plant/:username/:plantName", deletePlantByUsername)
+router.post("/plant/:username", addPlant)
 
 export {router as plantRouter }
