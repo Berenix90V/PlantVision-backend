@@ -1,11 +1,22 @@
----
-attachments: [db.png]
-title: Smart Plants
-created: '2022-04-03T15:52:09.534Z'
-modified: '2022-04-13T09:41:20.752Z'
----
-
 # Smart Plants
+
+This project aims at creating a platform in which users can install a small packet of sensors, specifically temperature, humidity, soil moisture and light intensity, close to their plants, and monitor their state by reading the values of the sensor from the application, as well as taking pictures of the plants, score them based on their health, and giving them small key words or phrases.
+
+## Authors
+
+Cristian Nicolae Lupascu (<cristiannicolae.lupascu@edu.turkuamk.fi>, <880140@stud.unive.it>)
+Veronica Zanella (<vernoica.zanella@edu.turkuamk.fi>, <826582@stud.unive.it>)
+
+## Deployment
+
+The backend is deployed using a `docker-compose` file, which will build an instance of the backend and an instance of MongoDb.
+
+## CI/CD
+
+The project supports CI/CD through local runners installed on our machines, and is used to run automated tests and merge requests. It's composed of 2 steps: `build` and `test`. 
+
+The `build` stage is used to create the execution environment, download the node packages and cache the results for faster execution.
+The `test` stage will get the cached environment and will execute the unit and integrations tests that we have written for both the front and backend of the application, using a shared mongodb container built in the `build` stage.
 
 ## Backend
 
