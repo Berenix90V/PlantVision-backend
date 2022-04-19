@@ -37,7 +37,6 @@
     "redoc-cli": "^0.13.10",
     "swagger-jsdoc": "^6.1.0",
     "swagger-ui-express": "^4.3.0",
-    "yamljs": "^0.3.0",
-    "yarn": "^1.22.18"
+    "yamljs": "^0.3.0"
   }
 }

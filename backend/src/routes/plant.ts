@@ -99,7 +99,7 @@ const deletePlantByUsername = async (req: Request, res: Response) => {
  */
 const addPlant = async (req: Request, res: Response) => {
     const username = req.params.username
-    const {name, description, sensor, type} = req.body
+    const {name, description, sensor} = req.body
 
     if (!await User.exists({ username: username })) {
         return res.status(404).json(not_found("User not found"))
@@ -111,8 +111,7 @@ const addPlant = async (req: Request, res: Response) => {
         user!.plants.push(new Plant({
             name: name,
             description: description,
-            sensor: sensor,
-            type: type
+            sensor: sensor
         }))
         return user!.save().then(() => res.status(200).json(success("Plant added")))
 

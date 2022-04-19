@@ -8,7 +8,6 @@ import { sensorSchema, ISensor } from './sensors'
 export interface IPlant {
     name: string,
     description?: string,
-    type:string,
     createdAt?: Date,
     sensor?: [ISensor],
     attributes?: [IAttribute]
@@ -31,10 +30,6 @@ export const plantSchema = new mongoose.Schema<IPlant, PlantsModelType>({
         type: String,
         required: true,
         unique: true
-    },
-    type:{
-        type: String,
-        required: true,
     },
     description: {
         type: String,
