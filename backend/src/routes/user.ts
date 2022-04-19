@@ -70,8 +70,31 @@ const deleteUser = async (req:Request, res: Response) => {
 
 }
 
+
+const checkLogin = async (req: Request, res: Response) => {
+    const {username, password} = req.body
+    
+    const user = await User.findOne({ username: username })
+
+    if (!user) {
+        return res.status(404).json(not_found("User not found"))
+    }
+    else {
+        if(user.password == password){
+            return res.status(200).json({
+                username: user.username,
+                plants: user.plants
+            })
+        } else{
+            return res.status(404).json(not_found("Password not matching"))
+        }
+        
+    }
+}
+
 router.get("/user/:username", fetchUserByName)
 router.post("/user", addUser)
 router.delete("/user/:username", deleteUser)
+router.post("/user/login", checkLogin)
 
 export { router as userRouter }
