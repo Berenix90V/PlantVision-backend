@@ -548,6 +548,10 @@ components:
     Plant:
       type: object
       properties:
+        type:
+          type: string
+          description: The type of the plant
+          example: Basel
         name:
           type: string
           description: The name of the plant
@@ -563,6 +567,7 @@ components:
             $ref: '#/components/schemas/Sensor'
       required:
         - name
+        - type
     MessageType:
       type: string
       enum: [OK, NOT_FOUND, CONFLICT]
