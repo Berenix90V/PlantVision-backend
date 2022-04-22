@@ -114,13 +114,6 @@ For the database we chose to use MongoDB, because it has less contraints and che
             soilMoisture: float
           }
         ],
-        attributes: [
-          Attribute: {
-            score: integer,
-            attributes: <Optional> [string],
-            imageOfTheDay: <Optional> image
-          }
-        ]
       }
     ],
   }
@@ -134,22 +127,11 @@ We chose to collect the bare minimum amount of data from the user, since there i
 In Typescript, these objects are defined using interfaces, specifically:
 
 ```typescript
-interface IAttribute {
-    attributes: String[],
-    score?: number
-    imageOfTheDay?: {
-        data: Buffer,
-        contentType: String
-    },
-    createdAt?: Date
-}
-
 interface IPlant {
     name: string,
     description?: string,
     createdAt?: Date,
     sensor?: [ISensor],
-    attributes?: [IAttribute]
 }
 
 interface ISensor {
