@@ -9,7 +9,7 @@ This project aims at creating a platform in which users can install a small pack
 
 ## Deployment
 
-The backend is deployed using a `docker-compose` file, which will build an instance of the backend and an instance of MongoDb.
+The backend is deployed by installing and running in the background both the backend and the database, since neither NodeJs not MongoDB docker cotainers officially support ARM 32bit.
 
 ## CI/CD
 
@@ -67,7 +67,7 @@ const app = express()
 app.use(userRouter)
 ```
 
-For the full documentation refer to [the routes folder](https://git.dc.turkuamk.fi/edu.veronica.zanella/smart-plants/-/tree/master/backend/src/routes) and to the ReDoc [API documentation](https://git.dc.turkuamk.fi/edu.veronica.zanella/smart-plants/-/blob/master/backend/public/index.html). (**here Gitlab Pages would have beed the best option, but it is yet to be implemented.**)
+For the full documentation refer to [the routes folder](https://git.dc.turkuamk.fi/edu.veronica.zanella/smart-plants/-/tree/master/backend/src/routes) and to the ReDoc [API documentation](https://git.dc.turkuamk.fi/edu.veronica.zanella/smart-plants/-/blob/master/backend/public/index.html). (**here Gitlab Pages would have beed the best option, but it is yet to be implemented on this instance of Gitlab.**)
 
 
 ### Testing
