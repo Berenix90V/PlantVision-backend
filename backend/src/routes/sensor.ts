@@ -20,12 +20,12 @@ const fetchSensorData = async (req: Request, res: Response) => {
     const hub = req.params.hub
     const latest = req.query.latest
 
-    const user = await User.findOne({username: name, "hubs.location": hub, "hubs.plants.name": plantName})
+    const user = await User.findOne({username: name, "hubs.name": hub, "hubs.plants.name": plantName})
     if(!user) {
         return res.status(404).json(not_found(`User ${name} with plant ${plantName} not found`))
     }
     else {
-        const sensorReadings = user.hubs!.find(h => h.location == hub)?.plants!.find(p => p.name == plantName)?.sensor!
+        const sensorReadings = user.hubs!.find(h => h.name == hub)?.plants!.find(p => p.name == plantName)?.sensor!
         return res.status(200).json(latest && latest == 'true' ? sensorReadings.at(sensorReadings.length - 1) : sensorReadings);
     }
 }
@@ -48,7 +48,7 @@ const addReading = async (req: Request, res: Response) => {
     if(!user)
         return res.status(404).json(not_found("User not found"))
     else {
-        const userHub: IHub | undefined = user.hubs!.find((h) => h.location == hub);
+        const userHub: IHub | undefined = user.hubs!.find((h) => h.name == hub);
         if(userHub != undefined) {
             const plant = userHub.plants!.find(p => p.name == plantName)
             if(plant != undefined) 

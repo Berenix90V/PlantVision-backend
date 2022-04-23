@@ -73,7 +73,7 @@ const fetchPlants = async (req: Request, res: Response) => {
     const username = req.params.username
     const hub = req.params.hub
 
-    const user = await User.findOne({username: username, "hubs.location": hub})
+    const user = await User.findOne({username: username, "hubs.name": hub})
     if(!user)
         return res.status(404).json(not_found("User or hub not found"))
     else {
@@ -92,13 +92,13 @@ const fetchPlant = async (req: Request, res: Response) => {
     const hub = req.params.hub
     const plantName = req.params.plantName
 
-    const user = await User.findOne({username: username, "hubs.location": hub})
+    const user = await User.findOne({username: username, "hubs.name": hub})
     if(!user)
         return res.status(404).json(not_found("User or hub not found"))
     else {
         const plant = user.hubs?.find(h => h.name == hub)?.plants?.find(p => p.name == plantName)
         if(plant == undefined)
-            return res.send(404).json(not_found("Plant not found"))
+            return res.status(404).json(not_found("Plant not found"))
         else
             return res.status(200).json(plant)
     }
@@ -110,7 +110,7 @@ const deletePlant = async (req: Request, res: Response) => {
     const hub = req.params.hub
     const plantName = req.params.plantName
 
-    const user = await User.findOne({username: username, "hubs.location": hub})
+    const user = await User.findOne({username: username, "hubs.name": hub})
     if(!user)
         return res.status(404).json(not_found("User or hub not found"))
     else {
