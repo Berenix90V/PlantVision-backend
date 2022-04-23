@@ -22,7 +22,7 @@ const fetchUserByName = async (req: Request, res: Response) => {
     else {
         return res.status(200).json({
             username: user.username,
-            plants: user.plants
+            hubs: user.hubs
         })
     }
 }
@@ -35,7 +35,7 @@ const fetchUserByName = async (req: Request, res: Response) => {
  * HTTP 409 with a conflict message if the user already exists
  */
 const addUser = async (req: Request, res: Response) => {
-    const { username, password, plants } = req.body
+    const { username, password, hubs } = req.body
 
     if (await User.exists({ username: username })) {
         return res.status(409).json(conflict(`User already exists`))
@@ -44,7 +44,7 @@ const addUser = async (req: Request, res: Response) => {
         const user = new User({
             username: username,
             password: password,
-            plants: plants
+            hubs: hubs
         })
         return user.save().then(() => res.status(201).json(success("User created")))
     }
@@ -83,7 +83,7 @@ const checkLogin = async (req: Request, res: Response) => {
         if(user.password == password){
             return res.status(200).json({
                 username: user.username,
-                plants: user.plants
+                hubs: user.hubs
             })
         } else{
             return res.status(404).json(not_found("Password not matching"))

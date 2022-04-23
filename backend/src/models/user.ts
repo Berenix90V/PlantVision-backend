@@ -1,5 +1,5 @@
 import mongoose from 'mongoose'
-import { plantSchema, IPlant } from "./plant";
+import { hubSchema, IHub } from "./hub";
 
 /**
  * Defines a user. A user is a collection of properties that define a single user. Only the strictly necessary data is being collected,
@@ -14,11 +14,11 @@ export interface IUser {
     username: string,
     password: string,
     createdAt?: Date,
-    plants?: IPlant[]
+    hubs?: IHub[]
 }
 
 type UserDocumentsProps = {
-    plants: mongoose.Types.DocumentArray<IPlant>
+    plants: mongoose.Types.DocumentArray<IHub>
 }
 type UsersModelType = mongoose.Model<IUser, {}, UserDocumentsProps>
 
@@ -36,8 +36,8 @@ const userSchema = new mongoose.Schema<IUser, UsersModelType>({
         type: Date,
         default: Date.now()
     },
-    plants: {
-        type: [plantSchema],
+    hubs: {
+        type: [hubSchema],
         default: [],
         unique: false,
         sparse: true
