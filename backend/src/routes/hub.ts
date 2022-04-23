@@ -69,6 +69,23 @@ const addHub = async (req: Request, res: Response) => {
     }
 }
 
+const fetchUserHubs = async(req: Request, res: Response) => {
+    const username = req.params.username
+
+    const user = await User.findOne({username: username})
+    if(!user)
+        return res.status(404).json(not_found("User or hub not found"))
+    else {
+        return res.status(200)
+        .json(user.hubs?.map(h=> h == null? null : {
+            hub_name: h.name,
+            plants: h.plants,
+            location: h.location,
+            slots: h.slots
+        } ))
+    }
+}
+
 const fetchPlants = async (req: Request, res: Response) => {
     const username = req.params.username
     const hub = req.params.hub
@@ -126,6 +143,7 @@ const deletePlant = async (req: Request, res: Response) => {
 
 router.post("/hub/:username/:hub", addPlant)
 router.get("/hub/:username/:hub", fetchPlants)
+router.get("/hubs/:username", fetchUserHubs)
 router.get("/hub/:username/:hub/:plantName", fetchPlant)
 router.delete("/hub/:username/:hub/:plantName", deletePlant)
 router.post("/hub/:username", addHub)
