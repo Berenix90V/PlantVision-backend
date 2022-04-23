@@ -6,6 +6,7 @@ import { plantSchema, IPlant } from "./plant";
  */
 export interface IHub {
     location: string,
+    name: string,
     slots: number,
     plants?: IPlant[]
 }
@@ -16,7 +17,11 @@ type UserDocumentsProps = {
 type UsersModelType = mongoose.Model<IHub, {}, UserDocumentsProps>
 
 const hubSchema = new mongoose.Schema<IHub, UsersModelType>({
-    location:{
+    name:{
+        type: String,
+        required: true
+    },
+    location: {
         type: String,
         required: true
     },

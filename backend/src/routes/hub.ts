@@ -23,7 +23,7 @@ const addPlant = async (req: Request, res: Response) => {
     }
     else {
         const user = await User.findOne({ username: username })
-        const userHub: IHub | undefined = user!.hubs!.find(h => h.location == hub)
+        const userHub: IHub | undefined = user!.hubs!.find(h => h.name == hub)
         if (!userHub || 
             (userHub.plants!.length == userHub.slots &&
                  userHub.plants!.filter(p => p.name == "").length == 0)
@@ -53,7 +53,7 @@ const addPlant = async (req: Request, res: Response) => {
 
 const addHub = async (req: Request, res: Response) => {
     const username = req.params.username
-    const {location, slots } = req.body
+    const {location, slots, name } = req.body
 
     if (!await User.exists({ username: username })) {
         return res.status(404).json(not_found("User not found"))
@@ -62,7 +62,8 @@ const addHub = async (req: Request, res: Response) => {
         const user = await User.findOne({ username: username })
         user?.hubs!.push(new Hub({
             location: location,
-            slots: slots
+            slots: slots,
+            name: name
         }))
         return user!.save().then(() => res.status(200).json(success("Hub added")))
     }
@@ -78,7 +79,7 @@ const fetchPlants = async (req: Request, res: Response) => {
     else {
         return res.status(200)
         .json(
-            user.hubs?.find(h => h.location == hub)!.plants?.map(p => p.name == "" ? null : {
+            user.hubs?.find(h => h.name == hub)!.plants?.map(p => p.name == "" ? null : {
                 name: p.name,
                 type: p.plantType,
                 description: p.description
@@ -95,7 +96,7 @@ const fetchPlant = async (req: Request, res: Response) => {
     if(!user)
         return res.status(404).json(not_found("User or hub not found"))
     else {
-        const plant = user.hubs?.find(h => h.location == hub)?.plants?.find(p => p.name == plantName)
+        const plant = user.hubs?.find(h => h.name == hub)?.plants?.find(p => p.name == plantName)
         if(plant == undefined)
             return res.send(404).json(not_found("Plant not found"))
         else
@@ -113,7 +114,7 @@ const deletePlant = async (req: Request, res: Response) => {
     if(!user)
         return res.status(404).json(not_found("User or hub not found"))
     else {
-        const plant = user.hubs?.find(h => h.location == hub)?.plants?.find(p => p.name == plantName)
+        const plant = user.hubs?.find(h => h.name == hub)?.plants?.find(p => p.name == plantName)
         if(plant == undefined)
             return res.send(404).json(not_found("Plant not found"))
         else
