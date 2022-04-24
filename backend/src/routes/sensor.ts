@@ -70,7 +70,6 @@ const addReading = async (req: Request, res: Response) => {
 
 const addReadings = async (req: Request, res: Response) => {
     const name = req.params.username
-    const plantName = req.params.plantName
     const hub = req.params.hub
     const {readings} = req.body
 
@@ -100,6 +99,6 @@ const addReadings = async (req: Request, res: Response) => {
 
 router.post(basePath, addReading)
 router.get(basePath, fetchSensorData)
-router.post("/sensor/:username/:hub/batch", addReadings)
+router.post("/batch/:username/:hub", addReadings)
 
 export {router as sensorRouter}
