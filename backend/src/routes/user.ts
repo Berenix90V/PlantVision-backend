@@ -1,4 +1,6 @@
 import express, { Request, Response } from 'express'
+import { user } from '../../tests/base'
+import { Hub } from '../models/hub'
 import { not_found, success, conflict } from '../models/message'
 import { User } from '../models/user'
 
@@ -92,9 +94,38 @@ const checkLogin = async (req: Request, res: Response) => {
     }
 }
 
+/**
+ * Adds a new plant to a hub
+ * @param req The request
+ * @param res The response
+ * @returns HTTP 201 with a success message if the user was added correctly,
+ * HTTP 409 with a conflict message if the user already exists, HTTP 404 with a not found message if the user is not found
+ */
+ const addHub = async (req: Request, res: Response) => {
+    const username = req.params.username
+    const {name, location, slots, plants} = req.body
+
+    if (!await User.exists({ username: username })) {
+        return res.status(404).json(not_found("User not found"))
+    }
+    else {
+        const user = await User.findOne({ username: username })
+        user!.hubs?.push(new Hub({
+            name: name,
+            location: location,
+            slots: slots
+        }))
+        return user!.save().then(() => res.status(200).json(success("Hub added")))
+
+    }
+}
+
+
 router.get("/user/:username", fetchUserByName)
 router.post("/user", addUser)
 router.delete("/user/:username", deleteUser)
 router.post("/user/login", checkLogin)
+router.post("/user/")
+router.post("/user/:username", addHub)
 
 export { router as userRouter }
