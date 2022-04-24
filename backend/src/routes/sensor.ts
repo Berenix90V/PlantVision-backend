@@ -99,6 +99,6 @@ const addReadings = async (req: Request, res: Response) => {
 
 router.post(basePath, addReading)
 router.get(basePath, fetchSensorData)
-router.post("/batch/:username/:hub", addReadings)
+router.post("/batch/:username/:hub/batch", addReadings)
 
 export {router as sensorRouter}
