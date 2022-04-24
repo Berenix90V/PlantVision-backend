@@ -51,15 +51,16 @@ const addReading = async (req: Request, res: Response) => {
         const userHub: IHub | undefined = user.hubs!.find((h) => h.name == hub);
         if(userHub != undefined) {
             const plant = userHub.plants!.find(p => p.name == plantName)
-            if(plant != undefined) 
+            if(plant != undefined) {
                 plant.sensor?.push(new Sensor({
                     airHumidity: airHumidity,
                     soilMoisture: soilMoisture,
                     airTemperature: airTemperature,
                     lightIntensity: lightIntensity
                 }))
+                user!.save().then(() => res.status(200).json(success("Sensor added")))
+            }
             else return res.status(404).json(not_found("Plant not found"))
-            user!.save().then(() => res.status(200).json(success("Plant added")))
         }
         else
             return res.status(404).json(not_found("Hub not found"))
