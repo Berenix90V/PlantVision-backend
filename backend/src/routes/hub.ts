@@ -51,24 +51,6 @@ const addPlant = async (req: Request, res: Response) => {
     }
 }
 
-const addHub = async (req: Request, res: Response) => {
-    const username = req.params.username
-    const {location, slots, name } = req.body
-
-    if (!await User.exists({ username: username })) {
-        return res.status(404).json(not_found("User not found"))
-    }
-    else {
-        const user = await User.findOne({ username: username })
-        user?.hubs!.push(new Hub({
-            location: location,
-            slots: slots,
-            name: name
-        }))
-        return user!.save().then(() => res.status(200).json(success("Hub added")))
-    }
-}
-
 const fetchUserHubs = async(req: Request, res: Response) => {
     const username = req.params.username
 
@@ -98,7 +80,7 @@ const fetchPlants = async (req: Request, res: Response) => {
         .json(
             user.hubs?.find(h => h.name == hub)!.plants?.map(p => p.name == "" ? null : {
                 name: p.name,
-                type: p.plantType,
+                plantType: p.plantType,
                 description: p.description
             }))
     }
@@ -146,6 +128,6 @@ router.get("/hub/:username/:hub", fetchPlants)
 router.get("/hubs/:username", fetchUserHubs)
 router.get("/hub/:username/:hub/:plantName", fetchPlant)
 router.delete("/hub/:username/:hub/:plantName", deletePlant)
-router.post("/hub/:username", addHub)
+
 
 export {router as hubRouter}
