@@ -68,7 +68,38 @@ const addReading = async (req: Request, res: Response) => {
     }
 }
 
+const addReadings = async (req: Request, res: Response) => {
+    const name = req.params.username
+    const plantName = req.params.plantName
+    const hub = req.params.hub
+    const {readings} = req.body
+
+    const user = await User.findOne({username: name})
+
+    if(!user)
+        return res.status(404).json(not_found("User not found"))
+    else {
+        const userHub: IHub | undefined = user.hubs!.find((h) => h.name == hub);
+        if(userHub != undefined) {
+            readings.forEach((reading: any) => {
+                const plant = userHub.plants!.find(p => p.name == reading.plantName)
+                if(plant != undefined)
+                    plant.sensor?.push(new Sensor({
+                        airHumidity: reading.airHumidity,
+                        soilMoisture: reading.soilMoisture,
+                        airTemperature: reading.airTemperature,
+                        lightIntensity: reading.lightIntensity
+                    }))
+            });
+            user!.save().then(() => res.status(200).json(success("Sensor added")))
+        }
+        else
+            return res.status(404).json(not_found("Hub not found"))
+    }
+}
+
 router.post(basePath, addReading)
 router.get(basePath, fetchSensorData)
+router.post("/sensor/:username/:hub/batch", addReadings)
 
 export {router as sensorRouter}
