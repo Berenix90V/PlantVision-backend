@@ -80,7 +80,7 @@ const fetchPlants = async (req: Request, res: Response) => {
         .json(
             user.hubs?.find(h => h.name == hub)!.plants?.map(p => p.name == "" ? null : {
                 name: p.name,
-                plantType: p.plantType,
+                type: p.plantType,
                 description: p.description
             }))
     }
