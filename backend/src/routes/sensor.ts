@@ -58,6 +58,7 @@ const addReading = async (req: Request, res: Response) => {
                     airTemperature: airTemperature,
                     lightIntensity: lightIntensity
                 }))
+                delete user.__v;
                 user!.save().then(() => res.status(200).json(success("Sensor added")))
             }
             else return res.status(404).json(not_found("Plant not found"))
