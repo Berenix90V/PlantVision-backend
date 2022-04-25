@@ -9,7 +9,24 @@ This project aims at creating a platform in which users can install a small pack
 
 ## Deployment
 
-The backend is deployed by installing and running in the background both the backend and the database, since neither NodeJs not MongoDB docker cotainers officially support ARM 32bit.
+The backend and the database are deployed inside docker containers, built using `docker-compose`:
+
+- For the backend we used `gmolaire/yarn` since it had all the necessary tools to build and run a typescript-node-express application using `yarn`
+- For the database we used the official `arm64v8/mongo:4.4` image, with the specific version `4.4`, since according to multiple forums and our own testing, is the last stable version fully working on raspberry Pis.
+
+To setup the raspberry pi it is needed to do some preliminary steps:
+
+1. Install docker and docker-compose usign `sudo apt install docker docker-compose`
+2. Install `ufw` to allow port `5000`, which is the port used by the backend
+3. Change the rules of `ufw` to allow port `5000` only over a specific network interface
+```sh
+sudo ufw allow ssh # <- to allow ssh connections remotely, optional
+sudo ufw enable # <- enable ufw, might lose ssh connectivity
+sudo ufw allow in on eth0 to any port 5000 # <- allows connection to port 5000 only through eth0
+sudo ufw reload
+```
+4. Give the current user (or create a new one) access to the group `docker` with `sudo usermod -aG docker $USER`
+5. Build the docker containers with `docker-compose up -d`
 
 ## CI/CD
 
@@ -102,19 +119,25 @@ For the database we chose to use MongoDB, because it has less contraints and che
   User: {
     name: string,
     password: hashed string,
-    plants: <Optional>[
-      Plant: {
-        name: string
-        description: <Optional> string,
-        sensors: [
-          Sensor: {
-            airTemperature: float,
-            airHumdity: float,
-            lightIntensity: float,
-            soilMoisture: float
-          }
-        ],
-      }
+    hubs: Optional [
+      location: string,
+      name: string,
+      slots: number,
+      plants: Optional [
+        Plant: {
+          name: string
+          description: <Optional> string,
+          plantType: string,
+          sensors: [
+            Sensor: {
+              airTemperature: number,
+              airHumdity: number,
+              lightIntensity: number,
+              soilMoisture: number
+            }
+          ],
+        }
+      ],
     ],
   }
 ]
@@ -127,6 +150,7 @@ We chose to collect the bare minimum amount of data from the user, since there i
 In Typescript, these objects are defined using interfaces, specifically:
 
 ```typescript
+// Defines a plant
 interface IPlant {
     name: string,
     description?: string,
@@ -134,6 +158,7 @@ interface IPlant {
     sensor?: [ISensor],
 }
 
+// Defines a sensor data packet, as to reduce the number of HTTP requests to the backend from the sensors
 interface ISensor {
     airHumidity: number,
     soilMoisture: number,
@@ -141,11 +166,20 @@ interface ISensor {
     lightIntensity: number,
 }
 
+// Defines a Hub. A Hub is a logical space that connect multiple plants with one single sensor pack, where each plant shares all readings but the soil moisture
+interface IHub {
+  slots: number,
+  location: string,
+  name: string
+  plants?: [IPlant] 
+}
+
+// Defines a simple user.
 interface IUser {
     username: string,
     password: string,
     createdAt?: Date,
-    plants?: IPlant[]
+    hubs?: [IHub]
 }
 ```
 
