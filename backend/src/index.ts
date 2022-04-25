@@ -5,7 +5,7 @@ import {config} from './config/config'
 /**
  * Connets to the database
  */
-mongoose.connect(config.CONNECTION_URL_REMOTE, {
+mongoose.connect(config.CONNECTION_URL_DOCKER, {
     user: config.DB_USERNAME,
     pass: config.DB_PASSWORD
 })

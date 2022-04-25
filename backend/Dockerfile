@@ -1,6 +1,9 @@
 FROM node:alpine
-WORKDIR "/app"
-COPY ./package.json ./
-RUN npm install
-COPY . .
-CMD ["npm", "start"]
+WORKDIR /usr/local/app
+ADD . .
+
+RUN yarn install --verbose
+
+EXPOSE 5000
+
+CMD ["yarn", "run", "start"]
